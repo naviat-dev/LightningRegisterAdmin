@@ -3,15 +3,20 @@ package lightning_productivity;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -23,13 +28,27 @@ public class App extends Application {
     private static Scene scene;
 
     @Override
-    public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), Color.BLACK);
-        // stage.setScene(scene);#
-        stage.setScene(new Scene(new Group(), Color.BLACK));
+    public void start(Stage stage) throws IOException, URISyntaxException {
+        ArrayList<Node> children = new ArrayList<Node>(); // ONLY add elements to be rendered at the root.
+        Group root = new Group();
+        scene = new Scene(loadFXML("MainFrame"), Color.rgb(203, 51, 152));
+        stage.setScene(scene);
 
         stage.setTitle("LightningRegister Admin");
-        // stage.getIcons().add(new Image("logo.png"));
+        stage.getIcons().add(new Image(getClass().getResource("logo.png").toURI().toString()));
+        // stage.setFullScreen(true);
+        Text text = new Text();
+        text.setText("Log in to LightningRegister Admin");
+        text.setFont(Font.font("Montserrat", FontWeight.BOLD, 60));
+        text.setFill(Color.WHITE);
+        text.setLayoutX(100);
+        text.setLayoutY(100);
+        children.add(text);
+
+        // Adds all children to the root
+        for (Node child : children) {
+            // root.getChildren().add(child);
+        }
         stage.show();
     }
 
@@ -43,8 +62,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        // We will need to have passwords so that unauthorised people cannot screw
-        // things up
+        // We will need to have passwords so that unauthorised people cannot screw things up
         ArrayList<String> validPasswords = new ArrayList<String>();
         Scanner getPasswords = new Scanner(
                 new File("lightning_register_admin\\src\\main\\java\\lightning_productivity\\validId.txt"));
@@ -52,6 +70,12 @@ public class App extends Application {
             validPasswords.add(getPasswords.nextLine());
         }
         getPasswords.close();
+
+        // Register all fonts needed for the program
+        File[] fonts = new File("lightning_register_admin\\src\\main\\java\\lightning_productivity\\fonts").listFiles();
+        for (File font : fonts) {
+            // new Font();
+        }
 
         launch();
     }
