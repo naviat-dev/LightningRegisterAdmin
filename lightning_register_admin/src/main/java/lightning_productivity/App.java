@@ -29,26 +29,12 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
-        ArrayList<Node> children = new ArrayList<Node>(); // ONLY add elements to be rendered at the root.
-        Group root = new Group();
         scene = new Scene(loadFXML("MainFrame"), Color.rgb(203, 51, 152));
         stage.setScene(scene);
 
         stage.setTitle("LightningRegister Admin");
         stage.getIcons().add(new Image(getClass().getResource("logo.png").toURI().toString()));
         // stage.setFullScreen(true);
-        Text text = new Text();
-        text.setText("Log in to LightningRegister Admin");
-        text.setFont(Font.font("Montserrat", FontWeight.BOLD, 60));
-        text.setFill(Color.WHITE);
-        text.setLayoutX(100);
-        text.setLayoutY(100);
-        children.add(text);
-
-        // Adds all children to the root
-        for (Node child : children) {
-            // root.getChildren().add(child);
-        }
         stage.show();
     }
 
