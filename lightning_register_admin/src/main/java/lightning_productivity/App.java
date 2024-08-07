@@ -2,15 +2,10 @@ package lightning_productivity;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -33,7 +28,7 @@ public class App extends Application {
         stage.setScene(scene);
 
         stage.setTitle("LightningRegister Admin");
-        stage.getIcons().add(new Image(getClass().getResource("logo.png").toURI().toString()));
+        stage.getIcons().add(new Image(getClass().getResource("img/logo.png").toURI().toString()));
         // stage.setFullScreen(true);
         stage.show();
     }
@@ -48,19 +43,10 @@ public class App extends Application {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        // We will need to have passwords so that unauthorised people cannot screw things up
-        ArrayList<String> validPasswords = new ArrayList<String>();
-        Scanner getPasswords = new Scanner(
-                new File("lightning_register_admin\\src\\main\\java\\lightning_productivity\\validId.txt"));
-        while (getPasswords.hasNextLine()) {
-            validPasswords.add(getPasswords.nextLine());
-        }
-        getPasswords.close();
-
-        // Register all fonts needed for the program
+                // Register all fonts needed for the program
         File[] fonts = new File("lightning_register_admin\\src\\main\\java\\lightning_productivity\\fonts").listFiles();
         for (File font : fonts) {
-            // new Font();
+            // TODO: store fonts locally within the program
         }
 
         launch();
