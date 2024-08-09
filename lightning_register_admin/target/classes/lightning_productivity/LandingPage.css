@@ -1,0 +1,12 @@
+.root {
+    -fx-background-color: rgb(203, 51, 152);
+    -fx-background-image: url("img/landing-page.png");
+}
+
+#title {
+    -fx-alignment: center;
+}
+
+#submitBtn {
+    -fx-alignment: center;
+}

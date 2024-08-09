@@ -12,8 +12,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * JavaFX App
@@ -24,7 +22,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException, URISyntaxException {
-        scene = new Scene(loadFXML("MainFrame"), Color.rgb(203, 51, 152));
+        scene = new Scene(loadFXML("LandingPage"), Color.rgb(203, 51, 152));
+        scene.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
         stage.setScene(scene);
 
         stage.setTitle("LightningRegister Admin");
@@ -43,7 +42,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-                // Register all fonts needed for the program
+        // Register all fonts needed for the program
         File[] fonts = new File("lightning_register_admin\\src\\main\\java\\lightning_productivity\\fonts").listFiles();
         for (File font : fonts) {
             // TODO: store fonts locally within the program
