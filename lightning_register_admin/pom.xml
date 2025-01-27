@@ -78,9 +78,29 @@
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-dom</artifactId>
+            <version>1.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-svg-dom</artifactId>
+            <version>1.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-util</artifactId>
+            <version>1.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-codec</artifactId>
             <version>1.18</version>
         </dependency>
+        <dependency>
+    <groupId>org.apache.xmlgraphics</groupId>
+    <artifactId>batik-constants</artifactId>
+    <version>1.16</version>
+</dependency>
     </dependencies>
     <build>
         <plugins>

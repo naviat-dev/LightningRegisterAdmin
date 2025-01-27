@@ -1,12 +1,8 @@
 .root {
-    -fx-background-color: rgb(203, 51, 152);
-    -fx-background-image: url("img/landing-page.png");
+    -fx-background-color: "black";
 }
 
-#title {
-    -fx-alignment: center;
-}
-
-#submitBtn {
-    -fx-alignment: center;
+.label {
+    -fx-font-family: "Montserrat";
+    -fx-text-fill: "white";
 }
