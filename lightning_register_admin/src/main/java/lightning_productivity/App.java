@@ -317,12 +317,8 @@ public class App extends Application {
 	 * 
 	 * @return An ArrayList of integers representing the indices of registrations with empty fields in the active region of the Google Sheet.
 	 * @throws IOException              If there is an error retrieving values from the Google Sheet.
-	 * @throws NoSuchAlgorithmException If a required cryptographic algorithm is not available.
-	 * @throws TranscoderException      If there is an error during SVG to PNG transcoding.
-	 * @throws WriterException          If there is an error with the barcode writer.
-	 * @throws MessagingException       If there is an error sending the email.
 	 */
-	public static ArrayList<String> scanUpdate() throws IOException, NoSuchAlgorithmException, TranscoderException, WriterException, MessagingException {
+	public static ArrayList<String> scanUpdate() throws IOException {
 		ArrayList<String> emptyReg = new ArrayList<>();
 		if (ACTIVE_REGION != null) {
 			List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
