@@ -47,7 +47,7 @@ public class LandingPage implements Initializable {
 		}
 		status.setText("Authenticating Google Gmail...");
 		try {
-			App.GMAIL_SERVICE = new Gmail.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), new AuthorizationCodeInstalledApp(new GoogleAuthorizationCodeFlow.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new InputStreamReader(new FileInputStream("lightning_register_admin\\src\\main\\resources\\credentials.json"))), List.of("https://www.googleapis.com/auth/gmail.send")).setAccessType("offline").build(), new LocalServerReceiver()).authorize("user")).setApplicationName(App.APPLICATION_NAME).build();
+			App.GMAIL_SERVICE = new Gmail.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), new AuthorizationCodeInstalledApp(new GoogleAuthorizationCodeFlow.Builder(GoogleNetHttpTransport.newTrustedTransport(), JacksonFactory.getDefaultInstance(), GoogleClientSecrets.load(JacksonFactory.getDefaultInstance(), new InputStreamReader(new FileInputStream("lightning_register_admin\\src\\main\\resources\\credentials.json"))), List.of("https://www.googleapis.com/auth/gmail.send")).setDataStoreFactory(new FileDataStoreFactory(new java.io.File(System.getProperty("user.home") + "/.credentials/gmail.googleapis.com-java-quickstart"))).setAccessType("offline").setApprovalPrompt("force").build(), new LocalServerReceiver.Builder().setPort(8888).build()).authorize("user")).setApplicationName(App.APPLICATION_NAME).build();
 		} catch (GeneralSecurityException | IOException e) {
 			status.setText("Fatal error authenticating Google Gmail.");
 		}
