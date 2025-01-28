@@ -12,23 +12,44 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lightning_productivity.MainPage">
    <children>
-      <Button fx:id="refresh" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="25.0" text="↻" />
-      <HBox fx:id="buttonGrp" alignment="TOP_CENTER" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="160.0" AnchorPane.topAnchor="0.0">
+      <Button fx:id="refresh" mnemonicParsing="false" onAction="#refresh" text="↻">
+         <font>
+            <Font name="Montserrat-Regular" size="20.0" />
+         </font></Button>
+      <HBox fx:id="buttonGrp" alignment="TOP_CENTER" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="40.8" AnchorPane.rightAnchor="228.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Button fx:id="region1Select" mnemonicParsing="false" onAction="#regionSwitch" prefHeight="26.0" prefWidth="1000.0" text="Region 1" />
-            <Button fx:id="region2Select" mnemonicParsing="false" onAction="#regionSwitch" prefHeight="26.0" prefWidth="1000.0" text="Region 2" />
-            <Button fx:id="region3Select" mnemonicParsing="false" onAction="#regionSwitch" prefHeight="26.0" prefWidth="1000.0" text="Region 3" />
-            <Button fx:id="region4Select" mnemonicParsing="false" onAction="#regionSwitch" prefHeight="26.0" prefWidth="1000.0" text="Region 4" />
-            <Button fx:id="regionCNSelect" mnemonicParsing="false" onAction="#regionSwitch" prefHeight="26.0" prefWidth="1000.0" text="Canada" />
-            <Button fx:id="regionCRSelect" mnemonicParsing="false" onAction="#regionSwitch" prefHeight="26.0" prefWidth="1000.0" text="Caribbean" />
+            <Button fx:id="region1Select" mnemonicParsing="false" onAction="#regionSwitch" prefWidth="1000.0" text="Region 1">
+               <font>
+                  <Font name="Montserrat-Regular" size="20.0" />
+               </font></Button>
+            <Button fx:id="region2Select" mnemonicParsing="false" onAction="#regionSwitch" prefWidth="1000.0" text="Region 2">
+               <font>
+                  <Font name="Montserrat-Regular" size="20.0" />
+               </font></Button>
+            <Button fx:id="region3Select" mnemonicParsing="false" onAction="#regionSwitch" prefWidth="1000.0" text="Region 3">
+               <font>
+                  <Font name="Montserrat-Regular" size="20.0" />
+               </font></Button>
+            <Button fx:id="region4Select" mnemonicParsing="false" onAction="#regionSwitch" prefWidth="1000.0" text="Region 4">
+               <font>
+                  <Font name="Montserrat-Regular" size="20.0" />
+               </font></Button>
+            <Button fx:id="regionCNSelect" mnemonicParsing="false" onAction="#regionSwitch" prefWidth="1000.0" text="Canada">
+               <font>
+                  <Font name="Montserrat-Regular" size="20.0" />
+               </font></Button>
+            <Button fx:id="regionCRSelect" mnemonicParsing="false" onAction="#regionSwitch" prefWidth="1000.0" text="Caribbean">
+               <font>
+                  <Font name="Montserrat-Regular" size="20.0" />
+               </font></Button>
          </children>
       </HBox>
-      <TextField fx:id="search" layoutX="435.0" prefHeight="25.0" prefWidth="160.0" promptText="Search by date or ID" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <TextField fx:id="search" layoutX="435.0" prefHeight="39.0" prefWidth="228.0" promptText="Search by date or ID" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <font>
-            <Font name="Montserrat-Regular" size="12.0" />
+            <Font name="Montserrat-Regular" size="20.0" />
          </font>
       </TextField>
-      <VBox layoutY="26.0" prefHeight="375.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+      <VBox layoutY="26.0" prefHeight="375.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="39.2">
          <children>
             <TitledPane fx:id="processedRegistrationsPane" animated="false" prefHeight="5000.0" text="Processed Registrations (9999)">
                <content>

@@ -298,7 +298,7 @@ public class App extends Application {
 	 */
 	public static void batchUpdate() throws NoSuchAlgorithmException, IOException, TranscoderException, WriterException, MessagingException {
 		ArrayList<String> registrationUpdates = scanUpdate();
-		for (int i = 0; i < registrationUpdates.size(); i+=2) {
+		for (int i = 0; i < registrationUpdates.size(); i += 2) {
 			List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
 			File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 			String currentID = generateID(current.get(COLUMN.get("firstName")).toString() + current.get(COLUMN.get("lastName")).toString() + current.get(COLUMN.get("email")).toString() + current.get(COLUMN.get("phone")).toString() + current.get(COLUMN.get("gender")).toString() + current.get(COLUMN.get("age")).toString());
@@ -325,7 +325,7 @@ public class App extends Application {
 	public static ArrayList<String> scanUpdate() throws IOException, NoSuchAlgorithmException, TranscoderException, WriterException, MessagingException {
 		ArrayList<String> emptyReg = new ArrayList<>();
 		if (ACTIVE_REGION != null) {
-			List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:K1000").execute().getValues();
+			List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
 			for (int i = 1; i < values.size(); i++) {
 				List<Object> current = values.get(i);
 				if (current.get(1).toString().equals("") && current.get(2).toString().equals("")) {
@@ -346,12 +346,12 @@ public class App extends Application {
 	 * <p>
 	 * The data is loaded from the following ranges:
 	 * <ul>
-	 * <li>Region 1!A1:K1000
-	 * <li>Region 2!A1:K1000
-	 * <li>Region 3!A1:K1000
-	 * <li>Region 4!A1:K1000
-	 * <li>Canada!A1:K1000
-	 * <li>South America & Caribbean!A1:K1000
+	 * <li>Region 1!A1:J1000
+	 * <li>Region 2!A1:J1000
+	 * <li>Region 3!A1:J1000
+	 * <li>Region 4!A1:J1000
+	 * <li>Canada!A1:J1000
+	 * <li>South America & Caribbean!A1:J1000
 	 * </ul>
 	 * <p>
 	 * The data is stored in a HashMap containing the following variables:
@@ -377,7 +377,7 @@ public class App extends Application {
 		String[] regionIndex = { "REGION_1", "REGION_2", "REGION_3", "REGION_4", "REGION_CN", "REGION_CR" };
 		for (int i = 0; i < 6; i++) {
 			try {
-				List<List<Object>> registrationsTemp = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:K1000").execute().getValues();
+				List<List<Object>> registrationsTemp = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:J1000").execute().getValues();
 
 				for (int j = 1; j < registrationsTemp.size(); j++) {
 					if (registrationsTemp.get(j).get(COLUMN.get("id")).toString().isEmpty()) {
