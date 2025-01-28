@@ -303,6 +303,8 @@ public class App extends Application {
 			File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 			String currentID = generateID(current.get(COLUMN.get("firstName")).toString() + current.get(COLUMN.get("lastName")).toString() + current.get(COLUMN.get("email")).toString() + current.get(COLUMN.get("phone")).toString() + current.get(COLUMN.get("gender")).toString() + current.get(COLUMN.get("age")).toString());
 			generateTicket(current, currentID, svgPath);
+			new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
+			new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
 			new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
 			svgPath.delete();
 			sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, "lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
