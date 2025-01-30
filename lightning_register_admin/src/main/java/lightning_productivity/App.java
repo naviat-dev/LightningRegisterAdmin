@@ -281,7 +281,7 @@ public class App extends Application {
 	 * Scans the active Google Sheet region for registrations with empty fields. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with empty fields at specific column indices. It collects the indices of such registrations and returns them as a list.
 	 * 
 	 * @return An ArrayList of integers representing the indices of registrations with empty fields in the active region of the Google Sheet.
-	 * @throws IOException              If there is an error retrieving values from the Google Sheet.
+	 * @throws IOException If there is an error retrieving values from the Google Sheet.
 	 */
 	public static ArrayList<String> scanUpdate() throws IOException {
 		ArrayList<String> emptyReg = new ArrayList<>();
@@ -336,11 +336,42 @@ public class App extends Application {
 		}
 	}
 
+	public static ArrayList<String> scanFlag() throws IOException {
+		List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
+		ArrayList<String> flagIndex = new ArrayList<>();
+		for (int i = 1; i < values.size(); i++) {
+			if (!values.get(i).get(COLUMN.get("flag")).toString().equals("")) {
+				flagIndex.add("C" + (i + 1));
+			}
+		}
+		return flagIndex;
+	}
+
+	/**
+	 * Removes flags from the active Google Sheet region.
+	 * <p>
+	 * This method scans the active region of the Google Sheet for flagged registrations and removes the flags by setting the "Flag" column to an empty string. It logs the number of flags found and their positions before removing them.
+	 * </p>
+	 * 
+	 * @throws IOException If there is an error updating values in the Google Sheet.
+	 */
+
+	public static void flagRemove() throws IOException {
+		ArrayList<String> flags = scanFlag();
+		System.out.println(flags.size());
+		for (int i = 0; i < flags.size(); i++) {
+			System.out.println(flags.get(i));
+			List<List<Object>> newFlag = Arrays.asList(Arrays.asList(""));
+			ValueRange body = new ValueRange().setValues(newFlag);
+			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flags.get(i), body).setValueInputOption("RAW").execute();
+		}
+	}
+
 	/**
 	 * Scans the active Google Sheet region for duplicate registrations. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with the same first and last name. It collects the indices of such registrations and returns them as a list.
 	 * 
 	 * @return An ArrayList of strings representing the indices of duplicate registrations in the active region of the Google Sheet.
-	 * @throws IOException              If there is an error retrieving values from the Google Sheet.
+	 * @throws IOException If there is an error retrieving values from the Google Sheet.
 	 */
 	public static ArrayList<String> scanDuplicate() throws IOException {
 		List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
@@ -367,11 +398,16 @@ public class App extends Application {
 		return duplicateIndex;
 	}
 
-	public static void flagUpdate() throws IOException {
+	/**
+	 * Updates the "Flag" column of the active Google Sheet region based on the results of the duplicate scan. This method is called at the start of the program and is used to populate the "Flag" column of the active region with the flag "Duplicate" for any duplicate registrations found. The method is also called each time the user clicks the "Scan" button in the application window.
+	 * 
+	 * @throws IOException If there is an error retrieving values from the Google Sheet.
+	 */
+	public static void duplicateUpdate() throws IOException {
 		ArrayList<String> flagUpdates = scanDuplicate();
-		for (int i = 0; i < flagUpdates.size(); i ++) {
-			List<List<Object>> newID = Arrays.asList(Arrays.asList("Duplicate"));
-			ValueRange body = new ValueRange().setValues(newID);
+		for (int i = 0; i < flagUpdates.size(); i++) {
+			List<List<Object>> newFlag = Arrays.asList(Arrays.asList("Duplicate"));
+			ValueRange body = new ValueRange().setValues(newFlag);
 			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flagUpdates.get(i), body).setValueInputOption("RAW").execute();
 		}
 	}

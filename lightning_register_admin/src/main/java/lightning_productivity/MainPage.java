@@ -198,7 +198,7 @@ public class MainPage implements Initializable {
 		});
 
 		try {
-			App.flagUpdate();
+			App.duplicateUpdate();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -207,14 +207,17 @@ public class MainPage implements Initializable {
 
 	/**
 	 * Clears the current tables and repopulates them based on the current region in the Google Sheets. This method first clears the current tables. Then it retrieves the current region from the Google Sheets and stores the values in a HashMap. It then iterates over the key set of the HashMap and creates a SimpleStringProperty array for each registration. If the registration has an ID, it is added to the processed table. If the registration has a flag, it is added to the flagged table. Otherwise, it is added to the unprocessed table.
-		 * @throws IOException If there is a problem reading the Google Sheets
-		 */
-		private void update() throws IOException {
+	 * 
+	 * @throws IOException If there is a problem reading the Google Sheets
+	 */
+	private void update(boolean flag) throws IOException {
 		processedRegistrations.clear();
 		flaggedRegistrations.clear();
 		unprocessedRegistrations.clear();
 		HashMap<String, List<Object>> registrations = App.registrations.get(App.ACTIVE_REGION);
-		App.flagUpdate();
+		if (flag) {
+			App.duplicateUpdate();
+		}
 		List<String> keySet = new ArrayList<>(registrations.keySet());
 		for (int i = 0; i < keySet.size(); i++) {
 			List<Object> current = registrations.get(keySet.get(i));
@@ -224,14 +227,11 @@ public class MainPage implements Initializable {
 			}
 			if (current.get(App.COLUMN.get("id")) != "") {
 				processedRegistrations.add(currentProp);
-				System.out.println("processed!");
 			} else {
 				if (current.get(App.COLUMN.get("flag")) != "") {
 					flaggedRegistrations.add(currentProp);
-					System.out.println("flagged!");
 				} else {
 					unprocessedRegistrations.add(currentProp);
-					System.out.println("unprocessed!");
 				}
 			}
 		}
@@ -246,15 +246,15 @@ public class MainPage implements Initializable {
 	 * Handles the button click event for the region selection buttons. Retrieves the button's ID and converts it to uppercase. It then replaces "SELECT" with nothing and "REGION" with "REGION_", and assigns the result to App.ACTIVE_REGION. Finally, it calls update() to update the table views.
 	 * 
 	 * @param e the ActionEvent object associated with the button click
-		 * @throws IOException If there is a problem reading the Google Sheets
-		 */
-		@FXML
-		private void regionSwitch(ActionEvent e) throws IOException {
+	 * @throws IOException If there is a problem reading the Google Sheets
+	 */
+	@FXML
+	private void regionSwitch(ActionEvent e) throws IOException {
 
 		Button src = (Button) e.getSource();
 		App.ACTIVE_REGION = src.getId().toUpperCase().replace("SELECT", "").replace("REGION", "REGION_");
 		src.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
-		update();
+		update(true);
 	}
 
 	@FXML
@@ -265,12 +265,14 @@ public class MainPage implements Initializable {
 
 	@FXML
 	private void unflag() throws IOException {
-		update();
+		App.flagRemove();
+		App.loadSheetData();
+		update(false);
 	}
 
 	@FXML
 	private void refresh() throws IOException {
 		App.loadSheetData();
-		update();
+		update(true);
 	}
 }
