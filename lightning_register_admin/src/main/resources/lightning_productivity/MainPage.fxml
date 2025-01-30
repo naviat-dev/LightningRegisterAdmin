@@ -49,11 +49,11 @@
             <Font name="Montserrat-Regular" size="20.0" />
          </font>
       </TextField>
-      <VBox layoutY="26.0" prefHeight="375.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="39.2">
+      <VBox layoutY="26.0" prefHeight="5000.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="39.2">
          <children>
-            <TitledPane fx:id="processedRegistrationsPane" animated="false" prefHeight="5000.0" text="Processed Registrations (9999)">
+            <TitledPane fx:id="processedRegistrationsPane" animated="false" text="Processed Registrations (9999)">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                      <children>
                         <TableView fx:id="processedRegistrationsTable" prefHeight="5000.0" prefWidth="600.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
                            <columns>
@@ -76,9 +76,9 @@
                   </AnchorPane>
                </content>
             </TitledPane>
-            <TitledPane fx:id="flaggedRegistrationsPane" animated="false" prefHeight="5000.0" text="Flagged Registrations (9999)">
+            <TitledPane fx:id="flaggedRegistrationsPane" animated="false" text="Flagged Registrations (9999)">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                      <children>
                         <TableView fx:id="flaggedRegistrationsTable" prefHeight="5000.0" prefWidth="600.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
                            <columns>
@@ -104,9 +104,9 @@
                   <Button fx:id="unflag" mnemonicParsing="false" onAction="#unflag" text="Unflag 9999 Registrations" />
                </graphic>
             </TitledPane>
-            <TitledPane fx:id="unprocessedRegistrationsPane" animated="false" prefHeight="5000.0" text="Unprocessed Registrations (9999)">
+            <TitledPane fx:id="unprocessedRegistrationsPane" animated="false" text="Unprocessed Registrations (9999)">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="200.0">
                      <children>
                         <TableView fx:id="unprocessedRegistrationsTable" prefHeight="5000.0" prefWidth="600.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
                            <columns>
