@@ -321,15 +321,20 @@ public class App extends Application {
 	public static void batchUpdate() throws NoSuchAlgorithmException, IOException, TranscoderException, WriterException, MessagingException {
 		ArrayList<String> registrationUpdates = scanUpdate();
 		for (int i = 0; i < registrationUpdates.size(); i += 2) {
-			List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
-			File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
-			String currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
-			generateTicket(current, currentID, svgPath);
-			new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
-			new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
-			new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
-			svgPath.delete();
-			sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, "lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
+			String currentID = "";
+			if (registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i)).get(COLUMN.get("age")).equals("3-6")) {
+				currentID = "TODDLER";
+			} else {
+				List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
+				File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+				currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
+				generateTicket(current, currentID, svgPath);
+				new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
+				new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
+				new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
+				svgPath.delete();
+				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, "lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
+			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			ValueRange body = new ValueRange().setValues(newID);
 			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), body).setValueInputOption("RAW").execute();
@@ -453,9 +458,8 @@ public class App extends Application {
 		for (int i = 0; i < 6; i++) {
 			try {
 				List<List<Object>> registrationsTemp = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:J1000").execute().getValues();
-
 				for (int j = 1; j < registrationsTemp.size(); j++) {
-					if (registrationsTemp.get(j).get(COLUMN.get("id")).toString().isEmpty()) {
+					if (registrationsTemp.get(j).get(COLUMN.get("id")).toString().isEmpty() || registrationsTemp.get(j).get(COLUMN.get("id")).toString().equals("TODDLER")) {
 						registrations.get(regionIndex[i]).put(registrationsTemp.get(j).get(COLUMN.get("date")).toString(), registrationsTemp.get(j));
 					} else {
 						registrations.get(regionIndex[i]).put(registrationsTemp.get(j).get(COLUMN.get("id")).toString(), registrationsTemp.get(j));
