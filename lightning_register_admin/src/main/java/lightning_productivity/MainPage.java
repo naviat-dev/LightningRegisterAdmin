@@ -240,8 +240,6 @@ public class MainPage implements Initializable {
 		unprocessedRegistrationsTitle.set("Unprocessed Registrations (" + unprocessedRegistrations.size() + ")");
 		processTitle.set("Process " + unprocessedRegistrations.size() + " Registrations");
 		unflagTitle.set("Unflag " + flaggedRegistrations.size() + " Registrations");
-		for (String test : App.scanDuplicate())
-			System.out.println(test);
 	}
 
 	/**

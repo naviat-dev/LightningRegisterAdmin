@@ -353,17 +353,14 @@ public class App extends Application {
 			String lastName = current.get(COLUMN.get("lastName")).toString().trim();
 			String key = (firstName + lastName).toLowerCase();
 			if (duplicateRegistrations.containsKey(key)) {
-				System.out.println(key);
 				duplicateIndex.add("C" + (i + 1));
 				duplicateRegistrations.put(key, "C" + (i + 1));
 			} else if (uniqueRegistrations.containsKey(key)) {
-				System.out.println("dup new");
 				duplicateIndex.add(uniqueRegistrations.get(key));
 				duplicateIndex.add("C" + (i + 1));
 				duplicateRegistrations.put(key, "C" + (i + 1));
 				uniqueRegistrations.remove(key);
 			} else {
-				System.out.println("new");
 				uniqueRegistrations.put(key, "C" + (i + 1));
 			}
 		}
