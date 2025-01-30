@@ -68,6 +68,7 @@ public class App extends Application {
 
 	public static Scene landingPage;
 	public static Scene mainPage;
+	public static Scene registrationPage;
 
 	public static Sheets SHEETS_SERVICE;
 	public static Gmail GMAIL_SERVICE;
@@ -114,8 +115,8 @@ public class App extends Application {
 		COLUMN.put("email", 5);
 		COLUMN.put("phone", 6);
 		COLUMN.put("gender", 7);
-		COLUMN.put("age", 8);
-		COLUMN.put("size", 9);
+		COLUMN.put("state", 8);
+		COLUMN.put("age", 9);
 		registrations = new HashMap<>();
 		SHEETS = new HashMap<>();
 		SHEETS.put("REGION_1", "Region 1");
@@ -277,6 +278,27 @@ public class App extends Application {
 	}
 
 	/**
+	 * Scans the active Google Sheet region for registrations with empty fields. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with empty fields at specific column indices. It collects the indices of such registrations and returns them as a list.
+	 * 
+	 * @return An ArrayList of integers representing the indices of registrations with empty fields in the active region of the Google Sheet.
+	 * @throws IOException              If there is an error retrieving values from the Google Sheet.
+	 */
+	public static ArrayList<String> scanUpdate() throws IOException {
+		ArrayList<String> emptyReg = new ArrayList<>();
+		if (ACTIVE_REGION != null) {
+			List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
+			for (int i = 1; i < values.size(); i++) {
+				List<Object> current = values.get(i);
+				if (current.get(1).toString().equals("") && current.get(2).toString().equals("")) {
+					emptyReg.add((String) current.get(0));
+					emptyReg.add("B" + (i + 1));
+				}
+			}
+		}
+		return emptyReg;
+	}
+
+	/**
 	 * Processes a batch update of registrations by generating tickets, sending emails, and updating the Google Sheets with generated IDs.
 	 * <p>
 	 * This method performs the following steps for each registration:
@@ -301,7 +323,7 @@ public class App extends Application {
 		for (int i = 0; i < registrationUpdates.size(); i += 2) {
 			List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
 			File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
-			String currentID = generateID(current.get(COLUMN.get("firstName")).toString() + current.get(COLUMN.get("lastName")).toString() + current.get(COLUMN.get("email")).toString() + current.get(COLUMN.get("phone")).toString() + current.get(COLUMN.get("gender")).toString() + current.get(COLUMN.get("age")).toString());
+			String currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
 			generateTicket(current, currentID, svgPath);
 			new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
 			new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
@@ -315,24 +337,46 @@ public class App extends Application {
 	}
 
 	/**
-	 * Scans the active Google Sheet region for registrations with empty fields. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with empty fields at specific column indices. It collects the indices of such registrations and returns them as a list.
+	 * Scans the active Google Sheet region for duplicate registrations. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with the same first and last name. It collects the indices of such registrations and returns them as a list.
 	 * 
-	 * @return An ArrayList of integers representing the indices of registrations with empty fields in the active region of the Google Sheet.
+	 * @return An ArrayList of strings representing the indices of duplicate registrations in the active region of the Google Sheet.
 	 * @throws IOException              If there is an error retrieving values from the Google Sheet.
 	 */
-	public static ArrayList<String> scanUpdate() throws IOException {
-		ArrayList<String> emptyReg = new ArrayList<>();
-		if (ACTIVE_REGION != null) {
-			List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
-			for (int i = 1; i < values.size(); i++) {
-				List<Object> current = values.get(i);
-				if (current.get(1).toString().equals("") && current.get(2).toString().equals("")) {
-					emptyReg.add((String) current.get(0));
-					emptyReg.add("B" + (i + 1));
-				}
+	public static ArrayList<String> scanDuplicate() throws IOException {
+		List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
+		HashMap<String, String> uniqueRegistrations = new HashMap<>();
+		HashMap<String, String> duplicateRegistrations = new HashMap<>();
+		ArrayList<String> duplicateIndex = new ArrayList<>();
+		for (int i = 1; i < values.size(); i++) {
+			List<Object> current = values.get(i);
+			String firstName = current.get(COLUMN.get("firstName")).toString().trim();
+			String lastName = current.get(COLUMN.get("lastName")).toString().trim();
+			String key = (firstName + lastName).toLowerCase();
+			if (duplicateRegistrations.containsKey(key)) {
+				System.out.println(key);
+				duplicateIndex.add("C" + (i + 1));
+				duplicateRegistrations.put(key, "C" + (i + 1));
+			} else if (uniqueRegistrations.containsKey(key)) {
+				System.out.println("dup new");
+				duplicateIndex.add(uniqueRegistrations.get(key));
+				duplicateIndex.add("C" + (i + 1));
+				duplicateRegistrations.put(key, "C" + (i + 1));
+				uniqueRegistrations.remove(key);
+			} else {
+				System.out.println("new");
+				uniqueRegistrations.put(key, "C" + (i + 1));
 			}
 		}
-		return emptyReg;
+		return duplicateIndex;
+	}
+
+	public static void flagUpdate() throws IOException {
+		ArrayList<String> flagUpdates = scanDuplicate();
+		for (int i = 0; i < flagUpdates.size(); i ++) {
+			List<List<Object>> newID = Arrays.asList(Arrays.asList("Duplicate"));
+			ValueRange body = new ValueRange().setValues(newID);
+			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flagUpdates.get(i), body).setValueInputOption("RAW").execute();
+		}
 	}
 
 	/**

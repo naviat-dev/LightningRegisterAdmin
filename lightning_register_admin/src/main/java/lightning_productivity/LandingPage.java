@@ -54,7 +54,7 @@ public class LandingPage implements Initializable {
 		status.setText("Ready!");
 		
 		Platform.runLater(() -> {
-			((Stage)status.getScene().getWindow()).setScene(App.mainPage);
+			((Stage) status.getScene().getWindow()).setScene(App.mainPage);
 		});
 	}
 }

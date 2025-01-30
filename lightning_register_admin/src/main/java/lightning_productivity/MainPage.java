@@ -1,5 +1,7 @@
 package lightning_productivity;
 
+import java.awt.Color;
+import java.awt.Insets;
 import java.io.IOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +28,9 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 
 public class MainPage implements Initializable {
 	@FXML
@@ -65,6 +70,8 @@ public class MainPage implements Initializable {
 	@FXML
 	private TableColumn<SimpleStringProperty[], String> processedGender;
 	@FXML
+	private TableColumn<SimpleStringProperty[], String> processedState;
+	@FXML
 	private TableColumn<SimpleStringProperty[], String> processedAge;
 	@FXML
 	private TitledPane flaggedRegistrationsPane;
@@ -88,6 +95,8 @@ public class MainPage implements Initializable {
 	private TableColumn<SimpleStringProperty[], String> flaggedPhone;
 	@FXML
 	private TableColumn<SimpleStringProperty[], String> flaggedGender;
+	@FXML
+	private TableColumn<SimpleStringProperty[], String> flaggedState;
 	@FXML
 	private TableColumn<SimpleStringProperty[], String> flaggedAge;
 	@FXML
@@ -113,6 +122,8 @@ public class MainPage implements Initializable {
 	@FXML
 	private TableColumn<SimpleStringProperty[], String> unprocessedGender;
 	@FXML
+	private TableColumn<SimpleStringProperty[], String> unprocessedState;
+	@FXML
 	private TableColumn<SimpleStringProperty[], String> unprocessedAge;
 
 	private ObservableList<SimpleStringProperty[]> processedRegistrations;
@@ -123,7 +134,6 @@ public class MainPage implements Initializable {
 	private ObservableList<SimpleStringProperty[]> unprocessedRegistrations;
 	private SimpleStringProperty unprocessedRegistrationsTitle;
 	private SimpleStringProperty processTitle;
-	
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -139,7 +149,8 @@ public class MainPage implements Initializable {
 		processedEmail.setCellValueFactory(cellData -> cellData.getValue()[5]);
 		processedPhone.setCellValueFactory(cellData -> cellData.getValue()[6]);
 		processedGender.setCellValueFactory(cellData -> cellData.getValue()[7]);
-		processedAge.setCellValueFactory(cellData -> cellData.getValue()[8]);
+		processedState.setCellValueFactory(cellData -> cellData.getValue()[8]);
+		processedAge.setCellValueFactory(cellData -> cellData.getValue()[9]);
 		flaggedDate.setCellValueFactory(cellData -> cellData.getValue()[0]);
 		flaggedId.setCellValueFactory(cellData -> cellData.getValue()[1]);
 		flaggedFlag.setCellValueFactory(cellData -> cellData.getValue()[2]);
@@ -148,7 +159,8 @@ public class MainPage implements Initializable {
 		flaggedEmail.setCellValueFactory(cellData -> cellData.getValue()[5]);
 		flaggedPhone.setCellValueFactory(cellData -> cellData.getValue()[6]);
 		flaggedGender.setCellValueFactory(cellData -> cellData.getValue()[7]);
-		flaggedAge.setCellValueFactory(cellData -> cellData.getValue()[8]);
+		flaggedState.setCellValueFactory(cellData -> cellData.getValue()[8]);
+		flaggedAge.setCellValueFactory(cellData -> cellData.getValue()[9]);
 		unprocessedDate.setCellValueFactory(cellData -> cellData.getValue()[0]);
 		unprocessedId.setCellValueFactory(cellData -> cellData.getValue()[1]);
 		unprocessedFlag.setCellValueFactory(cellData -> cellData.getValue()[2]);
@@ -157,7 +169,8 @@ public class MainPage implements Initializable {
 		unprocessedEmail.setCellValueFactory(cellData -> cellData.getValue()[5]);
 		unprocessedPhone.setCellValueFactory(cellData -> cellData.getValue()[6]);
 		unprocessedGender.setCellValueFactory(cellData -> cellData.getValue()[7]);
-		unprocessedAge.setCellValueFactory(cellData -> cellData.getValue()[8]);
+		unprocessedState.setCellValueFactory(cellData -> cellData.getValue()[8]);
+		unprocessedAge.setCellValueFactory(cellData -> cellData.getValue()[9]);
 		processedRegistrationsTable.setItems(processedRegistrations);
 		flaggedRegistrationsTable.setItems(flaggedRegistrations);
 		unprocessedRegistrationsTable.setItems(unprocessedRegistrations);
@@ -184,23 +197,28 @@ public class MainPage implements Initializable {
 			return row;
 		});
 
-		update();
+		try {
+			App.flagUpdate();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
-	 * Clears the current tables and repopulates them based on the current region in the Google Sheets.
-	 * 
-	 * This method first clears the current tables. Then it retrieves the current region from the Google Sheets and stores the values in a HashMap. It then iterates over the key set of the HashMap and creates a SimpleStringProperty array for each registration. If the registration has an ID, it is added to the processed table. If the registration has a flag, it is added to the flagged table. Otherwise, it is added to the unprocessed table.
-	 */
-	private void update() {
+	 * Clears the current tables and repopulates them based on the current region in the Google Sheets. This method first clears the current tables. Then it retrieves the current region from the Google Sheets and stores the values in a HashMap. It then iterates over the key set of the HashMap and creates a SimpleStringProperty array for each registration. If the registration has an ID, it is added to the processed table. If the registration has a flag, it is added to the flagged table. Otherwise, it is added to the unprocessed table.
+		 * @throws IOException If there is a problem reading the Google Sheets
+		 */
+		private void update() throws IOException {
 		processedRegistrations.clear();
 		flaggedRegistrations.clear();
 		unprocessedRegistrations.clear();
 		HashMap<String, List<Object>> registrations = App.registrations.get(App.ACTIVE_REGION);
+		App.flagUpdate();
 		List<String> keySet = new ArrayList<>(registrations.keySet());
 		for (int i = 0; i < keySet.size(); i++) {
 			List<Object> current = registrations.get(keySet.get(i));
-			SimpleStringProperty[] currentProp = new SimpleStringProperty[9];
+			SimpleStringProperty[] currentProp = new SimpleStringProperty[10];
 			for (int j = 0; j < currentProp.length; j++) {
 				currentProp[j] = new SimpleStringProperty(current.get(j).toString());
 			}
@@ -222,21 +240,22 @@ public class MainPage implements Initializable {
 		unprocessedRegistrationsTitle.set("Unprocessed Registrations (" + unprocessedRegistrations.size() + ")");
 		processTitle.set("Process " + unprocessedRegistrations.size() + " Registrations");
 		unflagTitle.set("Unflag " + flaggedRegistrations.size() + " Registrations");
+		for (String test : App.scanDuplicate())
+			System.out.println(test);
 	}
 
 	/**
-	 * Handles the button click event for the region selection buttons.
-	 * 
-	 * Retrieves the button's ID and converts it to uppercase. It then replaces
-	 * "SELECT" with nothing and "REGION" with "REGION_", and assigns the result
-	 * to App.ACTIVE_REGION. Finally, it calls update() to update the table
-	 * views.
+	 * Handles the button click event for the region selection buttons. Retrieves the button's ID and converts it to uppercase. It then replaces "SELECT" with nothing and "REGION" with "REGION_", and assigns the result to App.ACTIVE_REGION. Finally, it calls update() to update the table views.
 	 * 
 	 * @param e the ActionEvent object associated with the button click
-	 */
-	@FXML
-	private void regionSwitch(ActionEvent e) {
-		App.ACTIVE_REGION = ((Button) e.getSource()).getId().toUpperCase().replace("SELECT", "").replace("REGION", "REGION_");
+		 * @throws IOException If there is a problem reading the Google Sheets
+		 */
+		@FXML
+		private void regionSwitch(ActionEvent e) throws IOException {
+
+		Button src = (Button) e.getSource();
+		App.ACTIVE_REGION = src.getId().toUpperCase().replace("SELECT", "").replace("REGION", "REGION_");
+		src.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
 		update();
 	}
 
@@ -247,7 +266,7 @@ public class MainPage implements Initializable {
 	}
 
 	@FXML
-	private void unflag() {
+	private void unflag() throws IOException {
 		update();
 	}
 

@@ -65,6 +65,7 @@
                               <TableColumn fx:id="unprocessedEmail" prefWidth="75.0" text="Email" />
                               <TableColumn fx:id="unprocessedPhone" prefWidth="75.0" text="Phone" />
                               <TableColumn fx:id="unprocessedGender" prefWidth="75.0" text="Gender" />
+                              <TableColumn fx:id="processedState" prefWidth="75.0" text="State/Province" />
                               <TableColumn fx:id="unprocessedAge" prefWidth="75.0" text="Age" />
                            </columns>
                            <columnResizePolicy>
@@ -89,6 +90,7 @@
                               <TableColumn fx:id="flaggedEmail" prefWidth="75.0" text="Email" />
                               <TableColumn fx:id="flaggedPhone" prefWidth="75.0" text="Phone" />
                               <TableColumn fx:id="flaggedGender" prefWidth="75.0" text="Gender" />
+                              <TableColumn fx:id="flaggedState" prefWidth="75.0" text="State/Province" />
                               <TableColumn fx:id="flaggedAge" prefWidth="75.0" text="Age" />
                            </columns>
                            <columnResizePolicy>
@@ -116,6 +118,7 @@
                               <TableColumn fx:id="processedEmail" prefWidth="75.0" text="Email" />
                               <TableColumn fx:id="processedPhone" prefWidth="75.0" text="Phone" />
                               <TableColumn fx:id="processedGender" prefWidth="75.0" text="Gender" />
+                              <TableColumn fx:id="unprocessedState" prefWidth="75.0" text="State/Province" />
                               <TableColumn fx:id="processedAge" prefWidth="75.0" text="Age" />
                            </columns>
                            <columnResizePolicy>
