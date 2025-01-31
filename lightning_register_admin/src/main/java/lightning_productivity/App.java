@@ -155,15 +155,15 @@ public class App extends Application {
 	 * @throws MessagingException If there is a problem creating the email
 	 * @throws IOException        If there is a problem reading the ticket image
 	 */
-	public static MimeMessage createTicketEmail(List<Object> user, String ticketPath) throws MessagingException, IOException {
+	public static MimeMessage createTicketEmail(List<Object> user, String id, String ticketPath) throws MessagingException, IOException {
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(user.get(COLUMN.get("email")).toString().replaceAll(" ", "")));
-		email.setSubject("Congratulations! Here is your ticket for Dominion 2K25");
+		email.setSubject("Congratulations, You're In! Welcome to IYC 2025");
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("<b>NOTE: This email is solely for testing purposes only. You're getting this email because you included your email as part of our test registration form. These tickets are NOT valid to be submitted to Dominion 2K25. If you wish to be removed from the list, reply to this email and we'll get you sorted. Thanks!</b><br><br><br><b>Hey there, " + user.get(COLUMN.get("firstName")) + "!</b><br><br>" + "Thanks for registering for the 2025 International Youth Convention. You have become part of a community of thousands of people just like you.<br><br>" + "Below you will find your ticket for the convention.<br><br>" + "<img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br>" + "<b>Please do not register again.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org.<br><br>" + "Thank you, and have a wonderful day!", "text/html");
+		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments.<br><br>Either as a teenager, young adult, or young professional, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><b>Registration Details:</b><br> - <b>Confirmation Code: </b>" + id + "<br> - <b>Event Date: </b>July 17 - 20, 2025<br> - <b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or at 651-621-3663.<br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!", "text/html");
 
 		// Create the image part
 		MimeBodyPart imagePart = new MimeBodyPart();
@@ -333,7 +333,7 @@ public class App extends Application {
 				new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
 				new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
 				svgPath.delete();
-				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, "lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
+				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, currentID,"lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			ValueRange body = new ValueRange().setValues(newID);
