@@ -1,7 +1,5 @@
 package lightning_productivity;
 
-import java.awt.Color;
-import java.awt.Insets;
 import java.io.IOException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -28,9 +26,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
+import javafx.stage.Stage;
 
 public class MainPage implements Initializable {
 	@FXML
@@ -186,21 +182,43 @@ public class MainPage implements Initializable {
 		process.textProperty().bind(processTitle);
 		unflag.textProperty().bind(unflagTitle);
 
+		processedRegistrationsTable.setRowFactory(table -> {
+			TableRow<SimpleStringProperty[]> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (event.getClickCount() == 2 && (!row.isEmpty())) {
+					SimpleStringProperty[] rowData = row.getItem();
+					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
+					((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
+				}
+			});
+			return row;
+		});
+		flaggedRegistrationsTable.setRowFactory(table -> {
+			TableRow<SimpleStringProperty[]> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (event.getClickCount() == 2 && (!row.isEmpty())) {
+					SimpleStringProperty[] rowData = row.getItem();
+					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
+					((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
+				}
+			});
+			return row;
+		});
 		unprocessedRegistrationsTable.setRowFactory(table -> {
 			TableRow<SimpleStringProperty[]> row = new TableRow<>();
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (!row.isEmpty())) {
 					SimpleStringProperty[] rowData = row.getItem();
 					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
+					((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
 				}
 			});
 			return row;
 		});
-
+		
 		try {
-			App.duplicateUpdate();
+			update(true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -250,10 +268,10 @@ public class MainPage implements Initializable {
 	 */
 	@FXML
 	private void regionSwitch(ActionEvent e) throws IOException {
-
+		// TODO: change old button back to old color
 		Button src = (Button) e.getSource();
 		App.ACTIVE_REGION = src.getId().toUpperCase().replace("SELECT", "").replace("REGION", "REGION_");
-		src.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+		// src.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
 		update(true);
 	}
 

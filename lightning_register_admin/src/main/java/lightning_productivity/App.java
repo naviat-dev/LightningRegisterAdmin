@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -32,20 +31,10 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.print.*;
-import javax.print.attribute.*;
-import javax.print.attribute.standard.*;
-
-import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
-import org.apache.batik.bridge.BridgeContext;
-import org.apache.batik.bridge.GVTBuilder;
-import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.apache.batik.util.XMLResourceDescriptor;
-// import org.w3c.dom.svg.SVGDocument;
-
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.sheets.v4.Sheets;
@@ -59,53 +48,50 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/**
- * JavaFX App
- */
 public class App extends Application {
 
 	public static Scene landingPage;
 	public static Scene mainPage;
 	public static Scene registrationPage;
-
-	public static Sheets SHEETS_SERVICE;
-	public static Gmail GMAIL_SERVICE;
-	public static String APPLICATION_NAME = "Dominion 2K25";
-	public static String SPREADHSEET_ID = "17lFflosq1LDnoBsfdFmC8fUolmnPAWdcxWPB_URtb9s";
-	public static HashMap<String, Integer> COLUMN;
-	public static HashMap<String, String> SHEETS;
-	public static String ACTIVE_REGION;
-	public static String[] TICKET;
-	public static PrintService PRINTER;
-
-	public static HashMap<String, HashMap<String, List<Object>>> registrations;
-
-	@Override
-	public void start(Stage stage) throws IOException, URISyntaxException, GeneralSecurityException {
-		landingPage = new Scene(loadFXML("LandingPage"));
-		landingPage.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
-		mainPage = new Scene(loadFXML("MainPage"));
-		stage.setScene(landingPage);
-		stage.setTitle("LightningRegister Admin");
-		// stage.getIcons().add(new Image(getClass().getResource("lightning_register_admin/src/main/resources/img/logo.png").toURI().toString()));
-		// stage.setFullScreen(true);
-		stage.show();
-	}
-
-	static void setRoot(String fxml) throws IOException {
-		landingPage.setRoot(loadFXML(fxml));
-	}
-
-	private static Parent loadFXML(String fxml) throws IOException {
-		FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-		return fxmlLoader.load();
-	}
-
-	public static void main(String[] args) throws GeneralSecurityException, IOException, MessagingException, WriterException, TranscoderException, NoSuchAlgorithmException {
-		// Initialise global variables
-		// These must be initialised before launch() runs, otherwise problems
+	public static String action;
+	
+		public static Sheets SHEETS_SERVICE;
+		public static Gmail GMAIL_SERVICE;
+		public static String APPLICATION_NAME = "Dominion 2K25";
+		public static String SPREADHSEET_ID = "17lFflosq1LDnoBsfdFmC8fUolmnPAWdcxWPB_URtb9s";
+		public static HashMap<String, Integer> COLUMN;
+		public static HashMap<String, String> SHEETS;
+		public static String ACTIVE_REGION;
+		public static String[] TICKET;
+		public static PrintService PRINTER;
+	
+		public static HashMap<String, HashMap<String, List<Object>>> registrations;
+	
+		@Override
+		public void start(Stage stage) throws IOException, URISyntaxException, GeneralSecurityException {
+			landingPage = new Scene(loadFXML("LandingPage"));
+			landingPage.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
+			mainPage = new Scene(loadFXML("MainPage"));
+			registrationPage = new Scene(loadFXML("RegistrationPage"));
+			stage.setScene(landingPage);
+			stage.setTitle("LightningRegister Admin");
+			// stage.getIcons().add(new Image(getClass().getResource("lightning_register_admin/src/main/resources/img/logo.png").toURI().toString()));
+			// stage.setFullScreen(true);
+			stage.show();
+		}
+	
+		public static Parent loadFXML(String fxml) throws IOException {
+			FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+			return fxmlLoader.load();
+		}
+	
+		public static void main(String[] args) throws GeneralSecurityException, IOException, MessagingException, WriterException, TranscoderException, NoSuchAlgorithmException {
+			// Initialise global variables
+			// These must be initialised before launch() runs, otherwise problems
+			action = "";
 		COLUMN = new HashMap<>();
 		COLUMN.put("date", 0);
 		COLUMN.put("id", 1);
@@ -163,7 +149,7 @@ public class App extends Application {
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments.<br><br>Either as a teenager, young adult, or young professional, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><b>Registration Details:</b><br> - <b>Confirmation Code: </b>" + id + "<br> - <b>Event Date: </b>July 17 - 20, 2025<br> - <b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or at 651-621-3663.<br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!", "text/html");
+		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + " " + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Either as a teenager, young adult, or young professional, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or at 651-621-3663.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html");
 
 		// Create the image part
 		MimeBodyPart imagePart = new MimeBodyPart();
@@ -329,16 +315,39 @@ public class App extends Application {
 				File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 				currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
 				generateTicket(current, currentID, svgPath);
-				new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
-				new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
 				new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
 				svgPath.delete();
-				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, currentID,"lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
+				review(current);
+				if (action.equals("reject")) {
+					continue;
+				} else if (action.equals("flag")) {
+					List<List<Object>> flag = Arrays.asList(Arrays.asList("Rejected at processing"));
+					ValueRange body = new ValueRange().setValues(flag);
+					SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1).replace("B", "C"), body).setValueInputOption("RAW").execute();
+					continue;
+				}
+				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, currentID, "lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			ValueRange body = new ValueRange().setValues(newID);
 			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), body).setValueInputOption("RAW").execute();
+			action = "";
+			new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
+			new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
 		}
+	}
+
+	public static void review(List<Object> registration) throws IOException {
+		FXMLLoader loader = new FXMLLoader(App.class.getResource("CheckPage.fxml"));
+		Parent root = loader.load();
+		CheckPage controller = loader.getController();
+		controller.initializeData(registration);
+		Stage modalStage = new Stage();
+		modalStage.setTitle("Review Details");
+		modalStage.initModality(Modality.APPLICATION_MODAL);
+		modalStage.setScene(new Scene(root));
+		System.out.println("does this even run?");
+		modalStage.showAndWait();
 	}
 
 	public static ArrayList<String> scanFlag() throws IOException {
@@ -360,7 +369,6 @@ public class App extends Application {
 	 * 
 	 * @throws IOException If there is an error updating values in the Google Sheet.
 	 */
-
 	public static void flagRemove() throws IOException {
 		ArrayList<String> flags = scanFlag();
 		System.out.println(flags.size());
