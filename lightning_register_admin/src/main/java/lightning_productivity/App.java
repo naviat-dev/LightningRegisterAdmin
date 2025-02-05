@@ -140,6 +140,8 @@ public class App extends Application {
 		FONT_SIZE.put('X', 54.349);
 		FONT_SIZE.put('Y', 53.717);
 		FONT_SIZE.put('Z', 46.529);
+		FONT_SIZE.put('-', 19.986);
+		FONT_SIZE.put(' ', 15.483);
 		TICKET = new String[50];
 		Scanner ticketReader = new Scanner(new File("lightning_register_admin\\src\\main\\resources\\ticket-template.svg"));
 		int lineNumber = 0;
