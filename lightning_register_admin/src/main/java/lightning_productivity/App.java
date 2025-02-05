@@ -68,7 +68,7 @@ public class App extends Application {
 	public static String ACTIVE_REGION;
 	public static String[] TICKET;
 	public static PrintService PRINTER;
-	public static HashMap<String, Double> FONT_SIZE;
+	public static HashMap<Character, Double> FONT_SIZE;
 
 	public static HashMap<String, HashMap<String, List<Object>>> registrations;
 
@@ -114,33 +114,32 @@ public class App extends Application {
 		SHEETS.put("REGION_CN", "Canada");
 		SHEETS.put("REGION_CR", "South America & Caribbean");
 		FONT_SIZE = new HashMap<>();
-		FONT_SIZE.put("A", 56.245);
-		FONT_SIZE.put("B", 47.555);
-		FONT_SIZE.put("C", 51.110);
-		FONT_SIZE.put("D", 48.819);
-		FONT_SIZE.put("E", 43.764);
-		FONT_SIZE.put("F", 39.972);
-		FONT_SIZE.put("G", 53.954);
-		FONT_SIZE.put("H", 47.555);
-		FONT_SIZE.put("I", 11.770);
-		FONT_SIZE.put("J", 39.261);
-		FONT_SIZE.put("K", 49.767);
-		FONT_SIZE.put("L", 39.103);
-		FONT_SIZE.put("M", 56.877);
-		FONT_SIZE.put("N", 47.555);
-		FONT_SIZE.put("O", 55.534);
-		FONT_SIZE.put("P", 45.897);
-		FONT_SIZE.put("Q", 55.534);
-		FONT_SIZE.put("R", 49.451);
-		FONT_SIZE.put("S", 46.687);
-		FONT_SIZE.put("T", 46.687);
-		FONT_SIZE.put("U", 47.634);
-		FONT_SIZE.put("V", 53.006);
-		FONT_SIZE.put("W", 74.730);
-		FONT_SIZE.put("X", 54.349);
-		FONT_SIZE.put("Y", 53.717);
-		FONT_SIZE.put("Z", 46.529);
-		FONT_SIZE.put("gap", 12.008);
+		FONT_SIZE.put('A', 56.245);
+		FONT_SIZE.put('B', 47.555);
+		FONT_SIZE.put('C', 51.110);
+		FONT_SIZE.put('D', 48.819);
+		FONT_SIZE.put('E', 43.764);
+		FONT_SIZE.put('F', 39.972);
+		FONT_SIZE.put('G', 53.954);
+		FONT_SIZE.put('H', 47.555);
+		FONT_SIZE.put('I', 11.770);
+		FONT_SIZE.put('J', 39.261);
+		FONT_SIZE.put('K', 49.767);
+		FONT_SIZE.put('L', 39.103);
+		FONT_SIZE.put('M', 56.877);
+		FONT_SIZE.put('N', 47.555);
+		FONT_SIZE.put('O', 55.534);
+		FONT_SIZE.put('P', 45.897);
+		FONT_SIZE.put('Q', 55.534);
+		FONT_SIZE.put('R', 49.451);
+		FONT_SIZE.put('S', 46.687);
+		FONT_SIZE.put('T', 46.687);
+		FONT_SIZE.put('U', 47.634);
+		FONT_SIZE.put('V', 53.006);
+		FONT_SIZE.put('W', 74.730);
+		FONT_SIZE.put('X', 54.349);
+		FONT_SIZE.put('Y', 53.717);
+		FONT_SIZE.put('Z', 46.529);
 		TICKET = new String[50];
 		Scanner ticketReader = new Scanner(new File("lightning_register_admin\\src\\main\\resources\\ticket-template.svg"));
 		int lineNumber = 0;
@@ -306,7 +305,7 @@ public class App extends Application {
 				for (char c : registration.get(COLUMN.get("firstName")).toString().toCharArray()) {
 					length += FONT_SIZE.get(Character.toUpperCase(c));
 				}
-				length += FONT_SIZE.get("gap") * (firstNameLength - 1);
+				length += 12.008 * ((double) (firstNameLength - 1));
 				double scalar = Math.ceil(length / 550.0);
 				redo[35] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"193.94911\" id=\"first-name\">";
 			}
@@ -315,7 +314,7 @@ public class App extends Application {
 				for (char c : registration.get(COLUMN.get("lastName")).toString().toCharArray()) {
 					length += FONT_SIZE.get(Character.toUpperCase(c));
 				}
-				length += FONT_SIZE.get("gap") * (firstNameLength - 1);
+				length += 12.008 * ((double) (lastNameLength - 1));
 				double scalar = Math.ceil(length / 550.0);
 				redo[32] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"272.10001\" id=\"last-name\">";
 				redo[33] = "\t\t<tspan sodipodi:role=\"line\" id=\"tspan469\" x=\"28.004101\" y=\"" + (272.10001 - (54.349 * (1.0 - scalar))) + "\" style=\"stroke-width:7.40585;fill:#c3b53c;fill-opacity:1\">ZZZZZZZ</tspan>";
