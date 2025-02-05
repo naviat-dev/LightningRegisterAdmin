@@ -188,7 +188,7 @@ public class MainPage implements Initializable {
 				if (event.getClickCount() == 2 && (!row.isEmpty())) {
 					SimpleStringProperty[] rowData = row.getItem();
 					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
-					((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
+					// ((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
 				}
 			});
 			return row;
@@ -199,7 +199,7 @@ public class MainPage implements Initializable {
 				if (event.getClickCount() == 2 && (!row.isEmpty())) {
 					SimpleStringProperty[] rowData = row.getItem();
 					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
-					((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
+					// ((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
 				}
 			});
 			return row;
@@ -210,7 +210,7 @@ public class MainPage implements Initializable {
 				if (event.getClickCount() == 2 && (!row.isEmpty())) {
 					SimpleStringProperty[] rowData = row.getItem();
 					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
-					((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
+					// ((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
 				}
 			});
 			return row;

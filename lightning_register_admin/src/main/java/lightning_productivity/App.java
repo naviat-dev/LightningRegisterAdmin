@@ -141,6 +141,7 @@ public class App extends Application {
 		FONT_SIZE.put('Y', 53.717);
 		FONT_SIZE.put('Z', 46.529);
 		FONT_SIZE.put('-', 19.986);
+		FONT_SIZE.put('.', 11.454);
 		FONT_SIZE.put(' ', 15.483);
 		TICKET = new String[50];
 		Scanner ticketReader = new Scanner(new File("lightning_register_admin\\src\\main\\resources\\ticket-template.svg"));
@@ -302,14 +303,15 @@ public class App extends Application {
 				redo[i] = redoScn.nextLine();
 			}
 			redoScn.close();
+			resave.delete();
 			if (firstNameLength > 7) {
 				double length = 0;
 				for (char c : registration.get(COLUMN.get("firstName")).toString().toCharArray()) {
 					length += FONT_SIZE.get(Character.toUpperCase(c));
 				}
 				length += 12.008 * ((double) (firstNameLength - 1));
-				double scalar = Math.ceil(length / 550.0);
-				redo[35] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"193.94911\" id=\"first-name\">";
+				double scalar = Math.min(550.0 / length, 1.0);
+				redo[35] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (double) (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"193.94911\" id=\"first-name\">";
 			}
 			if (lastNameLength > 7) {
 				double length = 0;
@@ -317,12 +319,12 @@ public class App extends Application {
 					length += FONT_SIZE.get(Character.toUpperCase(c));
 				}
 				length += 12.008 * ((double) (lastNameLength - 1));
-				double scalar = Math.ceil(length / 550.0);
-				redo[32] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"272.10001\" id=\"last-name\">";
-				redo[33] = "\t\t<tspan sodipodi:role=\"line\" id=\"tspan469\" x=\"28.004101\" y=\"" + (272.10001 - (54.349 * (1.0 - scalar))) + "\" style=\"stroke-width:7.40585;fill:#c3b53c;fill-opacity:1\">ZZZZZZZ</tspan>";
+				double scalar = Math.min(550.0 / length, 1.0);
+				redo[32] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (double) (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"272.10001\" id=\"last-name\">";
+				redo[33] = "\t\t<tspan sodipodi:role=\"line\" id=\"tspan469\" x=\"28.004101\" y=\"" + (double) (272.10001 - (54.349 * (1.0 - scalar))) + "\" style=\"stroke-width:7.40585;fill:#c3b53c;fill-opacity:1\">" + registration.get(COLUMN.get("lastName")).toString().toUpperCase() + "</tspan>";
 			}
 			StringBuilder redoBuilder = new StringBuilder();
-			for (String string : currentTicket) {
+			for (String string : redo) {
 				redoBuilder.append(string + "\n");
 			}
 			PrintStream redoPs = new PrintStream("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
