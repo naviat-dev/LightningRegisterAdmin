@@ -31,6 +31,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.print.*;
+
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -57,41 +58,42 @@ public class App extends Application {
 	public static Scene mainPage;
 	public static Scene registrationPage;
 	public static String action;
-	
-		public static Sheets SHEETS_SERVICE;
-		public static Gmail GMAIL_SERVICE;
-		public static String APPLICATION_NAME = "Dominion 2K25";
-		public static String SPREADHSEET_ID = "17lFflosq1LDnoBsfdFmC8fUolmnPAWdcxWPB_URtb9s";
-		public static HashMap<String, Integer> COLUMN;
-		public static HashMap<String, String> SHEETS;
-		public static String ACTIVE_REGION;
-		public static String[] TICKET;
-		public static PrintService PRINTER;
-	
-		public static HashMap<String, HashMap<String, List<Object>>> registrations;
-	
-		@Override
-		public void start(Stage stage) throws IOException, URISyntaxException, GeneralSecurityException {
-			landingPage = new Scene(loadFXML("LandingPage"));
-			landingPage.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
-			mainPage = new Scene(loadFXML("MainPage"));
-			registrationPage = new Scene(loadFXML("RegistrationPage"));
-			stage.setScene(landingPage);
-			stage.setTitle("LightningRegister Admin");
-			// stage.getIcons().add(new Image(getClass().getResource("lightning_register_admin/src/main/resources/img/logo.png").toURI().toString()));
-			// stage.setFullScreen(true);
-			stage.show();
-		}
-	
-		public static Parent loadFXML(String fxml) throws IOException {
-			FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-			return fxmlLoader.load();
-		}
-	
-		public static void main(String[] args) throws GeneralSecurityException, IOException, MessagingException, WriterException, TranscoderException, NoSuchAlgorithmException {
-			// Initialise global variables
-			// These must be initialised before launch() runs, otherwise problems
-			action = "";
+
+	public static Sheets SHEETS_SERVICE;
+	public static Gmail GMAIL_SERVICE;
+	public static String APPLICATION_NAME = "Dominion 2K25";
+	public static String SPREADHSEET_ID = "17lFflosq1LDnoBsfdFmC8fUolmnPAWdcxWPB_URtb9s";
+	public static HashMap<String, Integer> COLUMN;
+	public static HashMap<String, String> SHEETS;
+	public static String ACTIVE_REGION;
+	public static String[] TICKET;
+	public static PrintService PRINTER;
+	public static HashMap<String, Double> FONT_SIZE;
+
+	public static HashMap<String, HashMap<String, List<Object>>> registrations;
+
+	@Override
+	public void start(Stage stage) throws IOException, URISyntaxException, GeneralSecurityException {
+		landingPage = new Scene(loadFXML("LandingPage"));
+		landingPage.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
+		mainPage = new Scene(loadFXML("MainPage"));
+		registrationPage = new Scene(loadFXML("RegistrationPage"));
+		stage.setScene(landingPage);
+		stage.setTitle("LightningRegister Admin");
+		// stage.getIcons().add(new Image(getClass().getResource("lightning_register_admin/src/main/resources/img/logo.png").toURI().toString()));
+		// stage.setFullScreen(true);
+		stage.show();
+	}
+
+	public static Parent loadFXML(String fxml) throws IOException {
+		FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+		return fxmlLoader.load();
+	}
+
+	public static void main(String[] args) throws GeneralSecurityException, IOException, MessagingException, WriterException, TranscoderException, NoSuchAlgorithmException {
+		// Initialise global variables
+		// These must be initialised before launch() runs, otherwise problems
+		action = "";
 		COLUMN = new HashMap<>();
 		COLUMN.put("date", 0);
 		COLUMN.put("id", 1);
@@ -111,6 +113,34 @@ public class App extends Application {
 		SHEETS.put("REGION_4", "Region 4");
 		SHEETS.put("REGION_CN", "Canada");
 		SHEETS.put("REGION_CR", "South America & Caribbean");
+		FONT_SIZE = new HashMap<>();
+		FONT_SIZE.put("A", 56.245);
+		FONT_SIZE.put("B", 47.555);
+		FONT_SIZE.put("C", 51.110);
+		FONT_SIZE.put("D", 48.819);
+		FONT_SIZE.put("E", 43.764);
+		FONT_SIZE.put("F", 39.972);
+		FONT_SIZE.put("G", 53.954);
+		FONT_SIZE.put("H", 47.555);
+		FONT_SIZE.put("I", 11.770);
+		FONT_SIZE.put("J", 39.261);
+		FONT_SIZE.put("K", 49.767);
+		FONT_SIZE.put("L", 39.103);
+		FONT_SIZE.put("M", 56.877);
+		FONT_SIZE.put("N", 47.555);
+		FONT_SIZE.put("O", 55.534);
+		FONT_SIZE.put("P", 45.897);
+		FONT_SIZE.put("Q", 55.534);
+		FONT_SIZE.put("R", 49.451);
+		FONT_SIZE.put("S", 46.687);
+		FONT_SIZE.put("T", 46.687);
+		FONT_SIZE.put("U", 47.634);
+		FONT_SIZE.put("V", 53.006);
+		FONT_SIZE.put("W", 74.730);
+		FONT_SIZE.put("X", 54.349);
+		FONT_SIZE.put("Y", 53.717);
+		FONT_SIZE.put("Z", 46.529);
+		FONT_SIZE.put("gap", 12.008);
 		TICKET = new String[50];
 		Scanner ticketReader = new Scanner(new File("lightning_register_admin\\src\\main\\resources\\ticket-template.svg"));
 		int lineNumber = 0;
@@ -149,7 +179,7 @@ public class App extends Application {
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + " " + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Either as a teenager, young adult, or young professional, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or at 651-621-3663.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html");
+		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + " " + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Whether you're a starting professional, young adult, college student, or teenager, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or call 425-236-7364.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html"); // TODO: Add proper phone number
 
 		// Create the image part
 		MimeBodyPart imagePart = new MimeBodyPart();
@@ -223,12 +253,11 @@ public class App extends Application {
 	 *
 	 * @param registration the registration information
 	 * @param id           the unique identifier for the ticket
-	 * @param path         the path where the ticket image is to be saved
 	 * @throws WriterException          if there is an error writing the ticket image
 	 * @throws IOException              if there is an error reading or writing to the file system
 	 * @throws NoSuchAlgorithmException if the SHA-256 algorithm is not available
 	 */
-	public static void generateTicket(List<Object> registration, String id, File path) throws WriterException, IOException, NoSuchAlgorithmException {
+	public static void generateTicket(List<Object> registration, String id) throws WriterException, IOException, NoSuchAlgorithmException {
 		String[] currentTicket = TICKET.clone();
 		File barcodeSave = new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png");
 		MatrixToImageWriter.writeToPath(new PDF417Writer().encode(id, BarcodeFormat.PDF_417, 1000, 1000), "PNG", barcodeSave.toPath());
@@ -258,9 +287,47 @@ public class App extends Application {
 		for (String string : currentTicket) {
 			ticketBuilder.append(string + "\n");
 		}
-		PrintStream ps = new PrintStream(path);
+		PrintStream ps = new PrintStream("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 		ps.print(new String(ticketBuilder));
 		ps.close();
+
+		int firstNameLength = registration.get(COLUMN.get("firstName")).toString().length();
+		int lastNameLength = registration.get(COLUMN.get("lastName")).toString().length();
+		if (firstNameLength > 7 || lastNameLength > 7) {
+			File resave = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+			Scanner redoScn = new Scanner(resave);
+			String[] redo = new String[50];
+			for (int i = 0; redoScn.hasNext(); i++) {
+				redo[i] = redoScn.nextLine();
+			}
+			redoScn.close();
+			if (firstNameLength > 7) {
+				double length = 0;
+				for (char c : registration.get(COLUMN.get("firstName")).toString().toCharArray()) {
+					length += FONT_SIZE.get(Character.toUpperCase(c));
+				}
+				length += FONT_SIZE.get("gap") * (firstNameLength - 1);
+				double scalar = Math.ceil(length / 550.0);
+				redo[35] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"193.94911\" id=\"first-name\">";
+			}
+			if (lastNameLength > 7) {
+				double length = 0;
+				for (char c : registration.get(COLUMN.get("lastName")).toString().toCharArray()) {
+					length += FONT_SIZE.get(Character.toUpperCase(c));
+				}
+				length += FONT_SIZE.get("gap") * (firstNameLength - 1);
+				double scalar = Math.ceil(length / 550.0);
+				redo[32] = "\t<text xml:space=\"preserve\" style=\"font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:" + (78.9958 * scalar) + "px;line-height:125%;font-family:Archivo;-inkscape-font-specification:'Archivo Heavy';writing-mode:lr-tb;fill:#c3b53c;stroke-width:7.40585;fill-opacity:1\" x=\"28.004101\" y=\"272.10001\" id=\"last-name\">";
+				redo[33] = "\t\t<tspan sodipodi:role=\"line\" id=\"tspan469\" x=\"28.004101\" y=\"" + (272.10001 - (54.349 * (1.0 - scalar))) + "\" style=\"stroke-width:7.40585;fill:#c3b53c;fill-opacity:1\">ZZZZZZZ</tspan>";
+			}
+			StringBuilder redoBuilder = new StringBuilder();
+			for (String string : currentTicket) {
+				redoBuilder.append(string + "\n");
+			}
+			PrintStream redoPs = new PrintStream("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+			redoPs.print(new String(redoBuilder));
+			redoPs.close();
+		}
 	}
 
 	/**
@@ -314,7 +381,7 @@ public class App extends Application {
 				List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
 				File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 				currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
-				generateTicket(current, currentID, svgPath);
+				generateTicket(current, currentID);
 				new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
 				svgPath.delete();
 				review(current);
@@ -479,8 +546,4 @@ public class App extends Application {
 			}
 		}
 	}
-
-	/*
-	 * public static void test() { // Load SVG file String parser = XMLResourceDescriptor.getXMLParserClassName(); SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory(parser); SVGDocument svgDoc = factory.createSVGDocument(new File("ticket.svg").toURI().toString()); // Modify the text element dynamically Element textElement = svgDoc.getElementById("textElementId"); // Use your text element ID textElement.setTextContent("DynamicText"); // Render SVG and measure text size GVTBuilder builder = new GVTBuilder(); BridgeContext ctx = new BridgeContext(svgDoc); GraphicsNode graphicsNode = builder.build(ctx, svgDoc); GraphicsNode textNode = ctx.getGraphicsNode(textElement); if (textNode != null) { float textWidth = textNode.getBounds().getWidth(); System.out.println("Text Width: " + textWidth + "px"); } else { System.out.println("Text element not found!"); } }
-	 */
 }

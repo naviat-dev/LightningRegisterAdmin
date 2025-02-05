@@ -232,6 +232,7 @@ public class MainPage implements Initializable {
 		processedRegistrations.clear();
 		flaggedRegistrations.clear();
 		unprocessedRegistrations.clear();
+		App.loadSheetData();
 		HashMap<String, List<Object>> registrations = App.registrations.get(App.ACTIVE_REGION);
 		if (flag) {
 			App.duplicateUpdate();
