@@ -173,7 +173,7 @@ public class App extends Application {
 	 * @throws MessagingException If there is a problem creating the email
 	 * @throws IOException        If there is a problem reading the ticket image
 	 */
-	public static MimeMessage createTicketEmail(List<Object> user, String id, String ticketPath) throws MessagingException, IOException {
+	public static MimeMessage createTicketEmail(List<Object> user, String id) throws MessagingException, IOException {
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(user.get(COLUMN.get("email")).toString().replaceAll(" ", "")));
@@ -181,11 +181,11 @@ public class App extends Application {
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + " " + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Whether you're a starting professional, young adult, college student, or teenager, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or call 425-236-7364.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html"); // TODO: Add proper phone number
+		textPart.setContent("Hello, " + user.get(COLUMN.get("firstName")) + " " + user.get(COLUMN.get("lastName")) + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Whether you're a starting professional, young adult, college student, or teenager, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or call 425-236-7364.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html");
 
 		// Create the image part
 		MimeBodyPart imagePart = new MimeBodyPart();
-		imagePart.attachFile(new File(ticketPath));
+		imagePart.attachFile(new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
 		imagePart.setContentID("<image1>");
 		imagePart.setDisposition(MimeBodyPart.INLINE);
 
@@ -193,6 +193,25 @@ public class App extends Application {
 		Multipart multipart = new MimeMultipart("related");
 		multipart.addBodyPart(textPart);
 		multipart.addBodyPart(imagePart);
+
+		email.setContent(multipart);
+		return email;
+	}
+
+	public static MimeMessage createToddlerEmail(List<Object> user) throws MessagingException, IOException {
+		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
+		email.setFrom("mfmyouthministry@gmail.com");
+		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(user.get(COLUMN.get("email")).toString().replaceAll(" ", "")));
+		email.setSubject("Congratulations, You're In! Welcome to IYC 2025");
+
+		// Create the email body
+		MimeBodyPart textPart = new MimeBodyPart();
+		boolean gender = user.get(COLUMN.get("gender")).equals("Male");
+		textPart.setContent("Hello,<br><br>We want to let you know that we've received your registration for " + user.get(COLUMN.get("firstName")) + " " + user.get(COLUMN.get("lastName")) + ".<br><br>However, because " + (gender ? "he" : "she") + " is younger than 7 years of age, " + (gender ? "he" : "she") + " will not be issued a participant ticket. Provisions will still be made for " + (gender ? "him" : "her") + " during the convention.<br><br>Thank you for your understanding. Please let us know if you have any questions.<br><br>God bless you.", "text/html");
+
+		// Combine parts into a multipart/related message
+		Multipart multipart = new MimeMultipart("related");
+		multipart.addBodyPart(textPart);
 
 		email.setContent(multipart);
 		return email;
@@ -378,10 +397,11 @@ public class App extends Application {
 		ArrayList<String> registrationUpdates = scanUpdate();
 		for (int i = 0; i < registrationUpdates.size(); i += 2) {
 			String currentID = "";
-			if (registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i)).get(COLUMN.get("age")).equals("3-6")) {
+			List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
+			if (current.get(COLUMN.get("age")).equals("3-6")) {
 				currentID = "TODDLER";
+				sendMessage(GMAIL_SERVICE, "me", createToddlerEmail(current));
 			} else {
-				List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
 				File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 				currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
 				generateTicket(current, currentID);
@@ -396,7 +416,7 @@ public class App extends Application {
 					SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1).replace("B", "C"), body).setValueInputOption("RAW").execute();
 					continue;
 				}
-				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, currentID, "lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
+				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, currentID));
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			ValueRange body = new ValueRange().setValues(newID);
