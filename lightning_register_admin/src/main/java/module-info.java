@@ -9,8 +9,6 @@ module lightning_productivity {
 	requires com.google.zxing;
 	requires com.google.zxing.javase;
 	requires google.api.client;
-	requires google.api.services.gmail.v1.rev110;
-	requires google.api.services.sheets.v4.rev614;
 	requires java.desktop;
 	requires java.mail;
 	requires java.xml;
@@ -32,6 +30,9 @@ module lightning_productivity {
 	requires xml.apis.ext;
 	requires axiom.api;
 	requires jdk.xml.dom;
+	requires com.google.auth.oauth2;
+	requires com.google.auth;
+	requires com.google.api.client.json.gson;
 
 	opens lightning_productivity to javafx.fxml;
 

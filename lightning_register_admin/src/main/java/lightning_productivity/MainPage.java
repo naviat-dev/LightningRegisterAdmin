@@ -1,18 +1,10 @@
 package lightning_productivity;
 
-import java.io.IOException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
-
-import javax.mail.MessagingException;
-
-import org.apache.batik.transcoder.TranscoderException;
-
-import com.google.zxing.WriterException;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -26,7 +18,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
-import javafx.stage.Stage;
 
 public class MainPage implements Initializable {
 	@FXML
@@ -215,10 +206,10 @@ public class MainPage implements Initializable {
 			});
 			return row;
 		});
-		
+
 		try {
 			update(true);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -226,9 +217,9 @@ public class MainPage implements Initializable {
 	/**
 	 * Clears the current tables and repopulates them based on the current region in the Google Sheets. This method first clears the current tables. Then it retrieves the current region from the Google Sheets and stores the values in a HashMap. It then iterates over the key set of the HashMap and creates a SimpleStringProperty array for each registration. If the registration has an ID, it is added to the processed table. If the registration has a flag, it is added to the flagged table. Otherwise, it is added to the unprocessed table.
 	 * 
-	 * @throws IOException If there is a problem reading the Google Sheets
+	 * @throws Exception
 	 */
-	private void update(boolean flag) throws IOException {
+	private void update(boolean flag) throws Exception {
 		processedRegistrations.clear();
 		flaggedRegistrations.clear();
 		unprocessedRegistrations.clear();
@@ -244,10 +235,11 @@ public class MainPage implements Initializable {
 			for (int j = 0; j < currentProp.length; j++) {
 				currentProp[j] = new SimpleStringProperty(current.get(j).toString());
 			}
-			if (current.get(App.COLUMN.get("id")) != "") {
+			if (((String)current.get(App.COLUMN.get("id"))).length() > 6) {
+				System.out.println("start" + current.get(App.COLUMN.get("id")) + "end");
 				processedRegistrations.add(currentProp);
 			} else {
-				if (current.get(App.COLUMN.get("flag")) != "") {
+				if (((String)current.get(App.COLUMN.get("flag"))).length() > 0) {
 					flaggedRegistrations.add(currentProp);
 				} else {
 					unprocessedRegistrations.add(currentProp);
@@ -265,10 +257,10 @@ public class MainPage implements Initializable {
 	 * Handles the button click event for the region selection buttons. Retrieves the button's ID and converts it to uppercase. It then replaces "SELECT" with nothing and "REGION" with "REGION_", and assigns the result to App.ACTIVE_REGION. Finally, it calls update() to update the table views.
 	 * 
 	 * @param e the ActionEvent object associated with the button click
-	 * @throws IOException If there is a problem reading the Google Sheets
+	 * @throws Exception
 	 */
 	@FXML
-	private void regionSwitch(ActionEvent e) throws IOException {
+	private void regionSwitch(ActionEvent e) throws Exception {
 		// TODO: change old button back to old color
 		Button src = (Button) e.getSource();
 		App.ACTIVE_REGION = src.getId().toUpperCase().replace("SELECT", "").replace("REGION", "REGION_");
@@ -277,20 +269,20 @@ public class MainPage implements Initializable {
 	}
 
 	@FXML
-	private void process() throws NoSuchAlgorithmException, IOException, TranscoderException, WriterException, MessagingException {
+	private void process() throws Exception {
 		App.batchUpdate();
 		refresh(); // TODO: Change this to minimize API calls
 	}
 
 	@FXML
-	private void unflag() throws IOException {
+	private void unflag() throws Exception {
 		App.flagRemove();
 		App.loadSheetData();
 		update(false);
 	}
 
 	@FXML
-	private void refresh() throws IOException {
+	private void refresh() throws Exception {
 		App.loadSheetData();
 		update(true);
 	}

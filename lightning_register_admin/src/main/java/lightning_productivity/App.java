@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -20,26 +21,40 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.print.*;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
 
-import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.model.Message;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.ValueRange;
+
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.http.json.JsonHttpContent;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -59,10 +74,10 @@ public class App extends Application {
 	public static Scene registrationPage;
 	public static String action;
 
-	public static Sheets SHEETS_SERVICE;
-	public static Gmail GMAIL_SERVICE;
-	public static String APPLICATION_NAME = "Dominion 2K25";
 	public static String SPREADHSEET_ID = "17lFflosq1LDnoBsfdFmC8fUolmnPAWdcxWPB_URtb9s";
+	private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+	private static final String SHEETS_URL = "https://sheets.googleapis.com/v4/spreadsheets";
+	public static HttpRequestInitializer CREDENTIAL;
 	public static HashMap<String, Integer> COLUMN;
 	public static HashMap<String, String> SHEETS;
 	public static String ACTIVE_REGION;
@@ -90,7 +105,7 @@ public class App extends Application {
 		return fxmlLoader.load();
 	}
 
-	public static void main(String[] args) throws GeneralSecurityException, IOException, MessagingException, WriterException, TranscoderException, NoSuchAlgorithmException {
+	public static void main(String[] args) throws Exception {
 		// Initialise global variables
 		// These must be initialised before launch() runs, otherwise problems
 		action = "";
@@ -151,6 +166,7 @@ public class App extends Application {
 			lineNumber++;
 		}
 		ticketReader.close();
+		CREDENTIAL = loadCredentials();
 
 		// Printer setup
 		for (PrintService printer : PrintServiceLookup.lookupPrintServices(null, null)) {
@@ -160,8 +176,66 @@ public class App extends Application {
 			}
 		}
 		System.out.println(PRINTER == null ? "Printer not found. Badge printing will be unavailable." : "Printer found. Badge printing will be available.");
+		loadSheetData();
 
 		launch();
+	}
+
+	public static List<List<Object>> readSheetData(String spreadsheetId, String range, HttpRequestInitializer credential) throws Exception {
+		HttpRequest request = HTTP_TRANSPORT.createRequestFactory(credential).buildGetRequest(new GenericUrl(SHEETS_URL + "/" + spreadsheetId + "/values/" + range));
+		request.setParser(GsonFactory.getDefaultInstance().createJsonObjectParser());
+
+		// Parse the JSON response
+		Map<String, Object> response = request.execute().parseAs(Map.class);
+		List<List<Object>> values = ((List<List<Object>>) response.get("values"));
+		for (int i = values.size() - 1; i >= 0; i--) {
+			if (values.get(i).size() != 10) {
+				values.remove(i);
+			}
+		}
+		return (List<List<Object>>) response.get("values");
+	}
+
+	public static void writeSheetData(String spreadsheetId, String range, List<List<Object>> data, HttpRequestInitializer credential) throws Exception {
+		String url = SHEETS_URL + "/" + spreadsheetId + "/values/" + range + "?valueInputOption=RAW";
+		Map<String, Object> body = new HashMap<>();
+		body.put("values", data);
+
+		HttpContent content = new JsonHttpContent(GsonFactory.getDefaultInstance(), body);
+		HttpRequest request = HTTP_TRANSPORT.createRequestFactory(credential).buildPutRequest(new GenericUrl(url), content);
+		request.setParser(GsonFactory.getDefaultInstance().createJsonObjectParser());
+		request.execute();
+	}
+
+	public static void appendSheetData(String spreadsheetId, String range, List<List<Object>> data, HttpRequestInitializer credential) throws Exception {
+		String url = SHEETS_URL + "/" + spreadsheetId + "/values/" + range + ":append?valueInputOption=RAW";
+		Map<String, Object> body = new HashMap<>();
+		body.put("values", data);
+
+		HttpContent content = new JsonHttpContent(GsonFactory.getDefaultInstance(), body);
+		HttpRequest request = HTTP_TRANSPORT.createRequestFactory(credential).buildPostRequest(new GenericUrl(url), content);
+		request.setParser(GsonFactory.getDefaultInstance().createJsonObjectParser());
+
+		request.execute();
+	}
+
+	public static HttpRequestInitializer loadCredentials() throws Exception {
+		JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+		// Load the client secrets JSON file
+		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(new FileInputStream("lightning_register_admin\\src\\main\\resources\\credentials.json")));
+
+		// Set up the authorization code flow
+		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, clientSecrets, List.of("https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/gmail.send")).setAccessType("offline") // "offline" ensures a refresh token is granted
+				.setApprovalPrompt("force") // Forces re-prompt for user consent
+				.build();
+
+		// Use a local server receiver to handle the redirect from the user's browser
+		LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+
+		// Perform the authorization
+		Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+
+		return credential;
 	}
 
 	/**
@@ -173,7 +247,7 @@ public class App extends Application {
 	 * @throws MessagingException If there is a problem creating the email
 	 * @throws IOException        If there is a problem reading the ticket image
 	 */
-	public static MimeMessage createTicketEmail(List<Object> user, String id) throws MessagingException, IOException {
+	public static String createTicketEmail(List<Object> user, String id) throws MessagingException, IOException {
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(user.get(COLUMN.get("email")).toString().replaceAll(" ", "")));
@@ -181,7 +255,7 @@ public class App extends Application {
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("Hello, " + ((String)user.get(COLUMN.get("firstName"))).trim() + " " + ((String)user.get(COLUMN.get("lastName"))).trim() + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Whether you're a starting professional, young adult, college student, or teenager, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or call 425-236-7364.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html");
+		textPart.setContent("Hello, " + ((String) user.get(COLUMN.get("firstName"))).trim() + " " + ((String) user.get(COLUMN.get("lastName"))).trim() + "!</b><br><br>Your registration for the <b>International Youth Convention (Dominion 2025)</b> is confirmed! We're excited to officially welcome you to this life-changing event that promises to be inspiring, empowering, and filled with unforgettable moments. Whether you're a starting professional, young adult, college student, or teenager, get ready for inspiring sessions, vibrant worship, and meaningful connections that will ignite your passion and fuel your faith.<br><br><b>Registration Details:</b><br><b>Confirmation Code: </b>" + id + "<br><b>Event Date: </b>July 17 - 20, 2025<br><b>Venue: </b>10000 Kleckley Drive Houston TX, 77075, USA<br><br>Be sure to mark your calendar and keep an eye on your inbox for more updates as we count down to the convention.<br><br>Here is your event ticket. Please save this and present it at check-in.<br><br><img src=\"cid:image1\" style=\"width: 90%; height: auto;\"><br><br><b>PLEASE DO NOT MAKE DUPLICATE REGISTRATIONS.</b> If you believe that you have made a mistake on your form, or have any questions about your registration, please contact us at registration@mfmyouthministries.org or call 425-236-7364.<br><br>Stay inspired and get ready for an amazing experience!<br><br>" + "Thank you, and have a wonderful day!<br><br><b>MFM Youth Ministry</b><br><b>The Americas & Caribbean</b>", "text/html");
 
 		// Create the image part
 		MimeBodyPart imagePart = new MimeBodyPart();
@@ -195,10 +269,12 @@ public class App extends Application {
 		multipart.addBodyPart(imagePart);
 
 		email.setContent(multipart);
-		return email;
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		email.writeTo(buffer);
+		return Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
 	}
 
-	public static MimeMessage createToddlerEmail(List<Object> user) throws MessagingException, IOException {
+	public static String createToddlerEmail(List<Object> user) throws MessagingException, IOException {
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(user.get(COLUMN.get("email")).toString().replaceAll(" ", "")));
@@ -207,14 +283,16 @@ public class App extends Application {
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
 		boolean gender = user.get(COLUMN.get("gender")).equals("Male");
-		textPart.setContent("Hello,<br><br>We want to let you know that we've received your registration for " + ((String)user.get(COLUMN.get("firstName"))).trim() + " " + ((String)user.get(COLUMN.get("lastName"))).trim() + ".<br><br>However, because " + (gender ? "he" : "she") + " is younger than 7 years of age, " + (gender ? "he" : "she") + " will not be issued a participant ticket. Provisions will still be made for " + (gender ? "him" : "her") + " during the convention.<br><br>Thank you for your understanding. Please contact us at registration@mfmyouthministries.org or call 425-236-7364 if you have any questions.<br><br>God bless you.", "text/html");
+		textPart.setContent("Hello,<br><br>We want to let you know that we've received your registration for " + ((String) user.get(COLUMN.get("firstName"))).trim() + " " + ((String) user.get(COLUMN.get("lastName"))).trim() + ".<br><br>However, because " + (gender ? "he" : "she") + " is younger than 7 years of age, " + (gender ? "he" : "she") + " will not be issued a participant ticket. Provisions will still be made for " + (gender ? "him" : "her") + " during the convention.<br><br>Thank you for your understanding. Please contact us at registration@mfmyouthministries.org or call 425-236-7364 if you have any questions.<br><br>God bless you.", "text/html");
 
 		// Combine parts into a multipart/related message
 		Multipart multipart = new MimeMultipart("related");
 		multipart.addBodyPart(textPart);
 
 		email.setContent(multipart);
-		return email;
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		email.writeTo(buffer);
+		return Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
 	}
 
 	/**
@@ -226,15 +304,25 @@ public class App extends Application {
 	 * @throws MessagingException if there's a problem sending the message
 	 * @throws IOException        if there's a problem writing to the output stream
 	 */
-	public static void sendMessage(Gmail service, String userId, MimeMessage email) throws MessagingException, IOException {
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		email.writeTo(buffer);
-		String encodedEmail = Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
-		Message message = new Message();
-		message.setRaw(encodedEmail);
+	public static void sendMessage(String email, HttpRequestInitializer credential) throws Exception {
+		// Step 2: Construct the HTTP request
+		String url = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send";
 
-		service.users().messages().send(userId, message).execute();
-		System.out.println("Email sent successfully!");
+		// The request body is a JSON object with the "raw" field containing the encoded email
+		Map<String, String> emailContent = new HashMap<>();
+		emailContent.put("raw", email);
+
+		HttpContent content = new JsonHttpContent(GsonFactory.getDefaultInstance(), emailContent);
+
+		// Step 3: Create and send the HTTP request
+		HttpRequest request = HTTP_TRANSPORT.createRequestFactory(credential).buildPostRequest(new GenericUrl(url), content);
+		request.setParser(GsonFactory.getDefaultInstance().createJsonObjectParser());
+
+		// Execute the request and parse the response
+		Map<String, Object> response = request.execute().parseAs(Map.class);
+
+		// Step 4: Print the response for debugging or confirmation
+		System.out.println("Email sent successfully: " + response);
 	}
 
 	/**
@@ -356,12 +444,12 @@ public class App extends Application {
 	 * Scans the active Google Sheet region for registrations with empty fields. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with empty fields at specific column indices. It collects the indices of such registrations and returns them as a list.
 	 * 
 	 * @return An ArrayList of integers representing the indices of registrations with empty fields in the active region of the Google Sheet.
-	 * @throws IOException If there is an error retrieving values from the Google Sheet.
+	 * @throws Exception If there is an error retrieving values from the Google Sheet.
 	 */
-	public static ArrayList<String> scanUpdate() throws IOException {
+	public static ArrayList<String> scanUpdate() throws Exception {
 		ArrayList<String> emptyReg = new ArrayList<>();
 		if (ACTIVE_REGION != null) {
-			List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
+			List<List<Object>> values = readSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000", CREDENTIAL);
 			for (int i = 1; i < values.size(); i++) {
 				List<Object> current = values.get(i);
 				if (current.get(1).toString().equals("") && current.get(2).toString().equals("")) {
@@ -387,20 +475,16 @@ public class App extends Application {
 	 * <li>Updates the Google Sheets with the generated ID for the registration.</li>
 	 * </ol>
 	 * 
-	 * @throws NoSuchAlgorithmException if the SHA-256 algorithm is not available.
-	 * @throws IOException              if there is an error reading or writing files.
-	 * @throws TranscoderException      if there is an error transcoding the SVG to PNG.
-	 * @throws WriterException          if there is an error with the barcode writer.
-	 * @throws MessagingException       if there is an error sending the email.
+	 * @throws Exception If there is an error processing the batch update.
 	 */
-	public static void batchUpdate() throws NoSuchAlgorithmException, IOException, TranscoderException, WriterException, MessagingException {
+	public static void batchUpdate() throws Exception {
 		ArrayList<String> registrationUpdates = scanUpdate();
 		for (int i = 0; i < registrationUpdates.size(); i += 2) {
 			String currentID = "";
 			List<Object> current = registrations.get(ACTIVE_REGION).get(registrationUpdates.get(i));
 			if (current.get(COLUMN.get("age")).equals("3-6")) {
 				currentID = "TODDLER";
-				sendMessage(GMAIL_SERVICE, "me", createToddlerEmail(current));
+				sendMessage(createToddlerEmail(current), CREDENTIAL);
 			} else {
 				File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
 				currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
@@ -412,15 +496,13 @@ public class App extends Application {
 					continue;
 				} else if (action.equals("flag")) {
 					List<List<Object>> flag = Arrays.asList(Arrays.asList("Rejected at processing"));
-					ValueRange body = new ValueRange().setValues(flag);
-					SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1).replace("B", "C"), body).setValueInputOption("RAW").execute();
+					writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1).replace("B", "C"), flag, CREDENTIAL);
 					continue;
 				}
-				sendMessage(GMAIL_SERVICE, "me", createTicketEmail(current, currentID));
+				sendMessage(createTicketEmail(current, currentID), CREDENTIAL);
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
-			ValueRange body = new ValueRange().setValues(newID);
-			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), body).setValueInputOption("RAW").execute();
+			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), newID, CREDENTIAL);
 			action = "";
 			new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
 			new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
@@ -436,12 +518,11 @@ public class App extends Application {
 		modalStage.setTitle("Review Details");
 		modalStage.initModality(Modality.APPLICATION_MODAL);
 		modalStage.setScene(new Scene(root));
-		System.out.println("does this even run?");
 		modalStage.showAndWait();
 	}
 
-	public static ArrayList<String> scanFlag() throws IOException {
-		List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
+	public static ArrayList<String> scanFlag() throws Exception {
+		List<List<Object>> values = readSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000", CREDENTIAL);
 		ArrayList<String> flagIndex = new ArrayList<>();
 		for (int i = 1; i < values.size(); i++) {
 			if (!values.get(i).get(COLUMN.get("flag")).toString().equals("")) {
@@ -457,16 +538,15 @@ public class App extends Application {
 	 * This method scans the active region of the Google Sheet for flagged registrations and removes the flags by setting the "Flag" column to an empty string. It logs the number of flags found and their positions before removing them.
 	 * </p>
 	 * 
-	 * @throws IOException If there is an error updating values in the Google Sheet.
+	 * @throws Exception
 	 */
-	public static void flagRemove() throws IOException {
+	public static void flagRemove() throws Exception {
 		ArrayList<String> flags = scanFlag();
 		System.out.println(flags.size());
 		for (int i = 0; i < flags.size(); i++) {
 			System.out.println(flags.get(i));
 			List<List<Object>> newFlag = Arrays.asList(Arrays.asList(""));
-			ValueRange body = new ValueRange().setValues(newFlag);
-			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flags.get(i), body).setValueInputOption("RAW").execute();
+			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flags.get(i), newFlag, CREDENTIAL);
 		}
 	}
 
@@ -474,10 +554,10 @@ public class App extends Application {
 	 * Scans the active Google Sheet region for duplicate registrations. This method retrieves the values from the active region of the Google Sheet and checks each row to identify registrations with the same first and last name. It collects the indices of such registrations and returns them as a list.
 	 * 
 	 * @return An ArrayList of strings representing the indices of duplicate registrations in the active region of the Google Sheet.
-	 * @throws IOException If there is an error retrieving values from the Google Sheet.
+	 * @throws Exception
 	 */
-	public static ArrayList<String> scanDuplicate() throws IOException {
-		List<List<Object>> values = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000").execute().getValues();
+	public static ArrayList<String> scanDuplicate() throws Exception {
+		List<List<Object>> values = readSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000", CREDENTIAL);
 		HashMap<String, String> uniqueRegistrations = new HashMap<>();
 		HashMap<String, String> duplicateRegistrations = new HashMap<>();
 		ArrayList<String> duplicateIndex = new ArrayList<>();
@@ -498,20 +578,20 @@ public class App extends Application {
 				uniqueRegistrations.put(key, "C" + (i + 1));
 			}
 		}
+		System.out.println(duplicateIndex.size());
 		return duplicateIndex;
 	}
 
 	/**
 	 * Updates the "Flag" column of the active Google Sheet region based on the results of the duplicate scan. This method is called at the start of the program and is used to populate the "Flag" column of the active region with the flag "Duplicate" for any duplicate registrations found. The method is also called each time the user clicks the "Scan" button in the application window.
 	 * 
-	 * @throws IOException If there is an error retrieving values from the Google Sheet.
+	 * @throws Exception
 	 */
-	public static void duplicateUpdate() throws IOException {
+	public static void duplicateUpdate() throws Exception {
 		ArrayList<String> flagUpdates = scanDuplicate();
 		for (int i = 0; i < flagUpdates.size(); i++) {
 			List<List<Object>> newFlag = Arrays.asList(Arrays.asList("Duplicate"));
-			ValueRange body = new ValueRange().setValues(newFlag);
-			SHEETS_SERVICE.spreadsheets().values().update(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flagUpdates.get(i), body).setValueInputOption("RAW").execute();
+			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flagUpdates.get(i), newFlag, CREDENTIAL);
 		}
 	}
 
@@ -555,7 +635,7 @@ public class App extends Application {
 		String[] regionIndex = { "REGION_1", "REGION_2", "REGION_3", "REGION_4", "REGION_CN", "REGION_CR" };
 		for (int i = 0; i < 6; i++) {
 			try {
-				List<List<Object>> registrationsTemp = SHEETS_SERVICE.spreadsheets().values().get(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:J1000").execute().getValues();
+				List<List<Object>> registrationsTemp = readSheetData(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:J1000", CREDENTIAL);
 				for (int j = 1; j < registrationsTemp.size(); j++) {
 					if (registrationsTemp.get(j).get(COLUMN.get("id")).toString().isEmpty() || registrationsTemp.get(j).get(COLUMN.get("id")).toString().equals("TODDLER")) {
 						registrations.get(regionIndex[i]).put(registrationsTemp.get(j).get(COLUMN.get("date")).toString(), registrationsTemp.get(j));
