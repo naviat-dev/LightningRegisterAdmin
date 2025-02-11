@@ -236,7 +236,6 @@ public class MainPage implements Initializable {
 				currentProp[j] = new SimpleStringProperty(current.get(j).toString());
 			}
 			if (((String)current.get(App.COLUMN.get("id"))).length() > 6) {
-				System.out.println("start" + current.get(App.COLUMN.get("id")) + "end");
 				processedRegistrations.add(currentProp);
 			} else {
 				if (((String)current.get(App.COLUMN.get("flag"))).length() > 0) {

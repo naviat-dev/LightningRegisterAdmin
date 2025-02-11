@@ -542,9 +542,7 @@ public class App extends Application {
 	 */
 	public static void flagRemove() throws Exception {
 		ArrayList<String> flags = scanFlag();
-		System.out.println(flags.size());
 		for (int i = 0; i < flags.size(); i++) {
-			System.out.println(flags.get(i));
 			List<List<Object>> newFlag = Arrays.asList(Arrays.asList(""));
 			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flags.get(i), newFlag, CREDENTIAL);
 		}
@@ -578,7 +576,6 @@ public class App extends Application {
 				uniqueRegistrations.put(key, "C" + (i + 1));
 			}
 		}
-		System.out.println(duplicateIndex.size());
 		return duplicateIndex;
 	}
 
