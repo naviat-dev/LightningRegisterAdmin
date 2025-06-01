@@ -7,9 +7,11 @@ import javafx.stage.Stage;
 
 public class RegistrationPage {
 	@FXML
-	private Button back;
+	private Button acceptButton;
+	@FXML
+	private Button rejectButton;
 	
-	public void back(ActionEvent e) {
+	public void accept(ActionEvent e) {
 		((Stage) ((Button) e.getSource()).getScene().getWindow()).setScene(App.mainPage);
 	}
 }

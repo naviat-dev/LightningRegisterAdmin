@@ -33,6 +33,8 @@ module lightning_productivity {
 	requires com.google.auth.oauth2;
 	requires com.google.auth;
 	requires com.google.api.client.json.gson;
+	requires java.net.http;
+	requires org.jsoup;
 
 	opens lightning_productivity to javafx.fxml;
 

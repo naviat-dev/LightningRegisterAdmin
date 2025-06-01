@@ -1,17 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lightning_productivity.RegistrationPage">
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Button fx:id="button" mnemonicParsing="false" onAction="#back" text="Back ←" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <font>
-            <Font name="Montserrat Bold" size="15.0" />
-         </font>
-      </Button>
-      <ImageView fitHeight="300.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="50.0" />
+      <ImageView fitHeight="300.0" fitWidth="253.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="50.0">
+         <image>
+            <Image url="@../img/badge-placeholder.png" />
+         </image>
+      </ImageView>
+      <GridPane layoutX="252.0" layoutY="50.0" prefWidth="334.0" AnchorPane.rightAnchor="20.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <VBox>
+               <children>
+                  <Label text="First Name">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <VBox layoutX="10.0" layoutY="8.0" GridPane.columnIndex="1">
+               <children>
+                  <Label text="Last Name">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName1" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <VBox layoutX="177.0" layoutY="8.0" GridPane.rowIndex="1">
+               <children>
+                  <Label text="Phone">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName11" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <VBox layoutX="10.0" layoutY="39.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <children>
+                  <Label text="Email">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName111" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <VBox GridPane.rowIndex="2">
+               <children>
+                  <Label text="Age">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName1111" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <VBox layoutX="10.0" layoutY="69.0" GridPane.rowIndex="3">
+               <children>
+                  <Label text="Remarks">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName11111" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Accept" GridPane.rowIndex="4" />
+            <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Reject" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <VBox GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <children>
+                  <Label text="Region">
+                     <font>
+                        <Font name="Montserrat Italic" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="firstName1112" text="ZZZZZ">
+                     <font>
+                        <Font name="Montserrat-Regular" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+         </children>
+      </GridPane>
    </children>
 </AnchorPane>

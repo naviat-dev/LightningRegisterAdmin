@@ -10,7 +10,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
@@ -39,6 +42,10 @@ import javax.print.PrintServiceLookup;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -75,6 +82,12 @@ public class App extends Application {
 	public static String action;
 
 	public static String SPREADHSEET_ID = "17lFflosq1LDnoBsfdFmC8fUolmnPAWdcxWPB_URtb9s";
+	public static String REGION_1_ID = "1373506325";
+	public static String REGION_2_ID = "1263249048";
+	public static String REGION_3_ID = "1782656223";
+	public static String REGION_4_ID = "1560370955";
+	public static String REGION_CN_ID = "1364364484";
+	public static String REGION_CR_ID = "2058449702";
 	private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 	private static final String SHEETS_URL = "https://sheets.googleapis.com/v4/spreadsheets";
 	public static HttpRequestInitializer CREDENTIAL;
@@ -90,7 +103,6 @@ public class App extends Application {
 	@Override
 	public void start(Stage stage) throws IOException, URISyntaxException, GeneralSecurityException {
 		landingPage = new Scene(loadFXML("LandingPage"));
-		landingPage.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
 		mainPage = new Scene(loadFXML("MainPage"));
 		registrationPage = new Scene(loadFXML("RegistrationPage"));
 		stage.setScene(landingPage);
@@ -121,6 +133,12 @@ public class App extends Application {
 		COLUMN.put("state", 8);
 		COLUMN.put("age", 9);
 		registrations = new HashMap<>();
+		registrations.put("REGION_1", new HashMap<>());
+		registrations.put("REGION_2", new HashMap<>());
+		registrations.put("REGION_3", new HashMap<>());
+		registrations.put("REGION_4", new HashMap<>());
+		registrations.put("REGION_CN", new HashMap<>());
+		registrations.put("REGION_CR", new HashMap<>());
 		SHEETS = new HashMap<>();
 		SHEETS.put("REGION_1", "Region 1");
 		SHEETS.put("REGION_2", "Region 2");
@@ -181,19 +199,39 @@ public class App extends Application {
 		launch();
 	}
 
-	public static List<List<Object>> readSheetData(String spreadsheetId, String range, HttpRequestInitializer credential) throws Exception {
-		HttpRequest request = HTTP_TRANSPORT.createRequestFactory(credential).buildGetRequest(new GenericUrl(SHEETS_URL + "/" + spreadsheetId + "/values/" + range));
-		request.setParser(GsonFactory.getDefaultInstance().createJsonObjectParser());
-
-		// Parse the JSON response
-		Map<String, Object> response = request.execute().parseAs(Map.class);
-		List<List<Object>> values = ((List<List<Object>>) response.get("values"));
-		for (int i = values.size() - 1; i >= 0; i--) {
-			if (values.get(i).size() != 10) {
-				values.remove(i);
-			}
+	public static List<List<Object>> readSheetData(String region) throws Exception {
+		HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
+		java.net.http.HttpRequest request;
+		String url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT51-1ICfq3wcyyGniGbfYEymxOKJLFqCx6cz_EttxtzFEdGHyh5NcPCwVy8lFPFQ_MtGAbd11FER_s/pubhtml#";
+		System.out.println("Reading data from " + url);
+		Document doc = Jsoup.connect(url).get();
+		Element regionData;
+		if (region.equals("REGION_1")) {
+			regionData = doc.getElementById(REGION_1_ID);
+		} else if (region.equals("REGION_2")) {
+			regionData = doc.getElementById(REGION_2_ID);
+		} else if (region.equals("REGION_3")) {
+			regionData = doc.getElementById(REGION_3_ID);
+		} else if (region.equals("REGION_4")) {
+			regionData = doc.getElementById(REGION_4_ID);
+		} else if (region.equals("REGION_CN")) {
+			regionData = doc.getElementById(REGION_CN_ID);
+		} else if (region.equals("REGION_CR")) {
+			regionData = doc.getElementById(REGION_CR_ID);
+		} else {
+			throw new IllegalArgumentException("Invalid region: " + region);
 		}
-		return (List<List<Object>>) response.get("values");
+		Elements rows = regionData.select("tbody").select("tr");
+		List<List<Object>> values = new ArrayList<>();
+		for (Element row : rows) {
+			List<Object> rowData = new ArrayList<>();
+			Elements cells = row.select("td");
+			for (Element cell : cells) {
+				rowData.add(cell.text());
+			}
+			values.add(rowData);
+		}
+		return values;
 	}
 
 	public static void writeSheetData(String spreadsheetId, String range, List<List<Object>> data, HttpRequestInitializer credential) throws Exception {
@@ -449,7 +487,7 @@ public class App extends Application {
 	public static ArrayList<String> scanUpdate() throws Exception {
 		ArrayList<String> emptyReg = new ArrayList<>();
 		if (ACTIVE_REGION != null) {
-			List<List<Object>> values = readSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000", CREDENTIAL);
+			List<List<Object>> values = readSheetData(ACTIVE_REGION);
 			for (int i = 1; i < values.size(); i++) {
 				List<Object> current = values.get(i);
 				if (current.get(1).toString().equals("") && current.get(2).toString().equals("")) {
@@ -522,7 +560,7 @@ public class App extends Application {
 	}
 
 	public static ArrayList<String> scanFlag() throws Exception {
-		List<List<Object>> values = readSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000", CREDENTIAL);
+		List<List<Object>> values = readSheetData(ACTIVE_REGION);
 		ArrayList<String> flagIndex = new ArrayList<>();
 		for (int i = 1; i < values.size(); i++) {
 			if (!values.get(i).get(COLUMN.get("flag")).toString().equals("")) {
@@ -555,7 +593,7 @@ public class App extends Application {
 	 * @throws Exception
 	 */
 	public static ArrayList<String> scanDuplicate() throws Exception {
-		List<List<Object>> values = readSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!A1:J1000", CREDENTIAL);
+		List<List<Object>> values = readSheetData(ACTIVE_REGION);
 		HashMap<String, String> uniqueRegistrations = new HashMap<>();
 		HashMap<String, String> duplicateRegistrations = new HashMap<>();
 		ArrayList<String> duplicateIndex = new ArrayList<>();
@@ -623,16 +661,10 @@ public class App extends Application {
 	 * @throws IOException if there is a problem loading the data from the Google Sheets document.
 	 */
 	public static void loadSheetData() throws IOException {
-		registrations.put("REGION_1", new HashMap<>());
-		registrations.put("REGION_2", new HashMap<>());
-		registrations.put("REGION_3", new HashMap<>());
-		registrations.put("REGION_4", new HashMap<>());
-		registrations.put("REGION_CN", new HashMap<>());
-		registrations.put("REGION_CR", new HashMap<>());
 		String[] regionIndex = { "REGION_1", "REGION_2", "REGION_3", "REGION_4", "REGION_CN", "REGION_CR" };
 		for (int i = 0; i < 6; i++) {
 			try {
-				List<List<Object>> registrationsTemp = readSheetData(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:J1000", CREDENTIAL);
+				List<List<Object>> registrationsTemp = readSheetData(regionIndex[i]);
 				for (int j = 1; j < registrationsTemp.size(); j++) {
 					if (registrationsTemp.get(j).get(COLUMN.get("id")).toString().isEmpty() || registrationsTemp.get(j).get(COLUMN.get("id")).toString().equals("TODDLER")) {
 						registrations.get(regionIndex[i]).put(registrationsTemp.get(j).get(COLUMN.get("date")).toString(), registrationsTemp.get(j));
