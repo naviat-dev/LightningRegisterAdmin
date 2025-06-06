@@ -26,11 +26,11 @@ public class LandingPage implements Initializable {
 
 	@FXML
 	public void checkIn() {
-		((Stage) checkIn.getScene().getWindow()).setScene(App.mainPage);
+		((Stage) checkIn.getScene().getWindow()).setScene(App.registrationPage);
 	}
 
 	@FXML
 	public void process() {
-		((Stage) process.getScene().getWindow()).setScene(App.registrationPage);
+		((Stage) process.getScene().getWindow()).setScene(App.mainPage);
 	}
 }
