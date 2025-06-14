@@ -546,7 +546,7 @@ public class App extends Application {
 		} else if (registration.get(COLUMN.get("age")).equals("45-Above")) {
 			currentBadge[18] = ".s8 { fill: #fafafa }";
 		}
-		currentBadge[22] = "<text id=\"code-readout\" style=\"transform: matrix(1,0,0,1,160,1682)\"><tspan x=\"45\" y=\"100.7\" class=\"t1\">" + registration.get(COLUMN.get("id")).toString().toUpperCase() + "</tspan></text>";
+		currentBadge[22] = "<text id=\"code-readout\" x=\"205\" y=\"1782.7\"><tspan class=\"t1\">" + registration.get(COLUMN.get("id")).toString().toUpperCase() + "</tspan></text>";
 		if (registration.get(COLUMN.get("age")).equals("35-44") || registration.get(COLUMN.get("age")).equals("45-Above")) {
 			for (int i = 24; i < 33; i++) {
 				currentBadge[i] = "";
@@ -567,12 +567,12 @@ public class App extends Application {
 					foodOptions[4] = MEALS.getOrDefault(userMap.get("saturdayLunch"), "--");
 					foodOptions[5] = MEALS.getOrDefault(userMap.get("saturdayDinner"), "--");
 				}
-				currentBadge[25] = "<text id=\"food-s2\" style=\"transform: none\"><tspan x=\"0\" y=\"524.1\" class=\"t2\">" + foodOptions[5] + "</tspan></text>";
-				currentBadge[26] = "<text id=\"food-s1\" style=\"transform: matrix(1.39,0,0,1.39,101.823,1701.819)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[4] + "</tspan></text>";
-				currentBadge[27] = "<text id=\"food-f2\" style=\"transform: matrix(1.39,0,0,1.39,100.433,1615.642)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[3] + "</tspan></text>";
-				currentBadge[28] = "<text id=\"food-f1\" style=\"transform: matrix(1.39,0,0,1.39,100.433,1565.604)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[2] + "</tspan></text>";
-				currentBadge[29] = "<text id=\"food-t2\" style=\"transform: matrix(1.39,0,0,1.39,101.823,1479.428)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[1] + "</tspan></text>";
-				currentBadge[30] = "<text id=\"food-t1\" style=\"transform: matrix(1.39,0,0,1.39,101.823,1429.39)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[0] + "</tspan></text>";
+				currentBadge[25] = "<text id=\"food-s2\" x=\"101.823\" y=\"1751.857\"><tspan x=\"101.823\" y=\"1781.857\" class=\"t2\">" + foodOptions[5] + "</tspan></text>";
+				currentBadge[26] = "<text id=\"food-s1\" x=\"101.823\" y=\"1701.819\"><tspan x=\"101.823\" y=\"1731.819\" class=\"t2\">" + foodOptions[4] + "</tspan></text>";
+				currentBadge[27] = "<text id=\"food-f2\" x=\"100.433\" y=\"1615.642\"><tspan x=\"100.433\" y=\"1645.642\" class=\"t2\">" + foodOptions[3] + "</tspan></text>";
+				currentBadge[28] = "<text id=\"food-f1\" x=\"100.433\" y=\"1565.604\"><tspan x=\"100.433\" y=\"1595.604\" class=\"t2\">" + foodOptions[2] + "</tspan></text>";
+				currentBadge[29] = "<text id=\"food-t2\" x=\"101.823\" y=\"1479.428\"><tspan x=\"101.823\" y=\"1509.428\" class=\"t2\">" + foodOptions[1] + "</tspan></text>";
+				currentBadge[30] = "<text id=\"food-t1\" x=\"101.823\" y=\"1429.39\"><tspan x=\"101.823\" y=\"1459.39\" class=\"t2\">" + foodOptions[0] + "</tspan></text>";
 			}
 		}
 		currentBadge[36] = "<text id=\"first-name\" x=\"50%\" y=\"830\" text-anchor=\"middle\" dominant-baseline=\"middle\" style=\"transform: none;\"><tspan x=\"50%\" dy=\"0\" class=\"t7\">" + registration.get(COLUMN.get("firstName")) + "</tspan></text>";

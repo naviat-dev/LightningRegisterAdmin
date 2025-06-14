@@ -10,7 +10,7 @@
 		tspan { white-space:pre } 
 		.s0 { fill: #e6e6e6 } 
 		.t1 { font-size: 150px;fill: #000000;font-weight: 700;font-family: "Inconsolata-Bold", "Inconsolata" } 
-		.t2 { font-size: 34px;fill: #000000;font-weight: 400;font-family: "Bahnschrift" } 
+		.t2 { font-size: 45px;fill: #000000;font-weight: 400;font-family: "Bahnschrift" } 
 		.s3 { fill: #000000 } 
 		.s4 { fill: #c3b53c } 
 		.t5 { font-size: 83px;fill: #000000;font-weight: 400;font-family: "Bahnschrift-Bold", "Bahnschrift" } 
@@ -20,7 +20,7 @@
 	</style>
 	<use id="img1" xlink:href="#img1" transform="matrix(1,0,0,1,0,0)"/>
 	<path id="codes-back" fill-rule="evenodd" class="s0" d="m1275 1413v387h-1275v-387z"/>
-	<text id="code-readout" style="transform: matrix(1,0,0,1,160,1682)"><tspan x="45" y="100.7" class="t1">9999999999999</tspan></text>
+	<text id="code-readout" x="205" y="1782.7"><tspan class="t1">9999999999999</tspan></text>
 	<use id="img2" xlink:href="#img2" transform="matrix(1,0,0,1,175,1428)"/>
 	<g id="Folder 1">
 		<text id="food-s2" x="101.823" y="1751.857"><tspan x="101.823" y="1781.857" class="t2">99</tspan></text>
