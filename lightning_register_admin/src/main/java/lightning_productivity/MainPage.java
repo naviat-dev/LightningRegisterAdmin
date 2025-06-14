@@ -13,29 +13,37 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 public class MainPage implements Initializable {
 	@FXML
 	private Button refresh;
 	@FXML
-	private Button region1Select;
+	private Button back;
 	@FXML
-	private Button region2Select;
+	private TabPane tabs;
 	@FXML
-	private Button region3Select;
+	private VBox tables;
 	@FXML
-	private Button region4Select;
+	private Tab region1Select;
 	@FXML
-	private Button regionCNSelect;
+	private Tab region2Select;
 	@FXML
-	private Button regionCRSelect;
+	private Tab region3Select;
 	@FXML
-	private TextField search;
+	private Tab region4Select;
+	@FXML
+	private Tab regionCNSelect;
+	@FXML
+	private Tab regionCRSelect;
 	@FXML
 	private TitledPane processedRegistrationsPane;
 	@FXML
@@ -206,6 +214,21 @@ public class MainPage implements Initializable {
 			});
 			return row;
 		});
+		tabs.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+			if (oldTab.getContent() instanceof Pane) {
+				Pane oldPane = (Pane) oldTab.getContent();
+				oldPane.getChildren().remove(tables);
+			}
+			if (newTab.getContent() instanceof Pane) {
+				Pane newPane = (Pane) newTab.getContent();
+				newPane.getChildren().add(tables);
+			}
+			try {
+				regionSwitch(newTab);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 
 		try {
 			update(true);
@@ -259,9 +282,8 @@ public class MainPage implements Initializable {
 	 * @throws Exception
 	 */
 	@FXML
-	private void regionSwitch(ActionEvent e) throws Exception {
+	private void regionSwitch(Tab src) throws Exception {
 		// TODO: change old button back to old color
-		Button src = (Button) e.getSource();
 		App.ACTIVE_REGION = src.getId().toUpperCase().replace("SELECT", "").replace("REGION", "REGION_");
 		// src.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
 		update(true);

@@ -40,7 +40,7 @@ public class CheckPage {
 	 */
 	@FXML
 	public void initializeData(List<Object> registration) {
-		ticketView.setImage(new Image(new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").toURI().toString()));
+		ticketView.setImage(new Image(new File(App.TEMP_DIR + "ticket-raster.png").toURI().toString()));
 		firstName.setText(registration.get(App.COLUMN.get("firstName")).toString().trim());
 		lastName.setText(registration.get(App.COLUMN.get("lastName")).toString().trim());
 		gender.setText(registration.get(App.COLUMN.get("gender")).toString().trim());

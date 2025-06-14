@@ -10,7 +10,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
@@ -26,7 +28,6 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -36,6 +37,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 
+import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
@@ -55,6 +57,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -80,17 +83,19 @@ public class App extends Application {
 	public static HttpRequestInitializer CREDENTIAL;
 	public static HashMap<String, Integer> COLUMN;
 	public static HashMap<String, String> SHEETS;
+	public static HashMap<String, String> MEALS;
 	public static String ACTIVE_REGION;
 	public static String[] TICKET;
+	public static String[] BADGE;
 	public static PrintService PRINTER;
-	public static HashMap<Character, Double> FONT_SIZE;
+	public static HashMap<Character, Double> FONT_SIZE_TICKET;
+	public static String TEMP_DIR = System.getProperty("java.io.tmpdir") + "lightning_register_admin\\";
 
 	public static HashMap<String, HashMap<String, List<Object>>> registrations;
 
 	@Override
 	public void start(Stage stage) throws IOException, URISyntaxException, GeneralSecurityException {
 		landingPage = new Scene(loadFXML("LandingPage"));
-		landingPage.getStylesheets().add(getClass().getResource("LandingPage.css").toExternalForm());
 		mainPage = new Scene(loadFXML("MainPage"));
 		registrationPage = new Scene(loadFXML("RegistrationPage"));
 		stage.setScene(landingPage);
@@ -108,6 +113,10 @@ public class App extends Application {
 	public static void main(String[] args) throws Exception {
 		// Initialise global variables
 		// These must be initialised before launch() runs, otherwise problems
+		File tempDir = new File(TEMP_DIR);
+		if (!tempDir.exists()) {
+			tempDir.mkdirs();
+		}
 		action = "";
 		COLUMN = new HashMap<>();
 		COLUMN.put("date", 0);
@@ -128,36 +137,54 @@ public class App extends Application {
 		SHEETS.put("REGION_4", "Region 4");
 		SHEETS.put("REGION_CN", "Canada");
 		SHEETS.put("REGION_CR", "South America & Caribbean");
-		FONT_SIZE = new HashMap<>();
-		FONT_SIZE.put('A', 56.245);
-		FONT_SIZE.put('B', 47.555);
-		FONT_SIZE.put('C', 51.110);
-		FONT_SIZE.put('D', 48.819);
-		FONT_SIZE.put('E', 43.764);
-		FONT_SIZE.put('F', 39.972);
-		FONT_SIZE.put('G', 53.954);
-		FONT_SIZE.put('H', 47.555);
-		FONT_SIZE.put('I', 11.770);
-		FONT_SIZE.put('J', 39.261);
-		FONT_SIZE.put('K', 49.767);
-		FONT_SIZE.put('L', 39.103);
-		FONT_SIZE.put('M', 56.877);
-		FONT_SIZE.put('N', 47.555);
-		FONT_SIZE.put('O', 55.534);
-		FONT_SIZE.put('P', 45.897);
-		FONT_SIZE.put('Q', 55.534);
-		FONT_SIZE.put('R', 49.451);
-		FONT_SIZE.put('S', 46.687);
-		FONT_SIZE.put('T', 46.687);
-		FONT_SIZE.put('U', 47.634);
-		FONT_SIZE.put('V', 53.006);
-		FONT_SIZE.put('W', 74.730);
-		FONT_SIZE.put('X', 54.349);
-		FONT_SIZE.put('Y', 53.717);
-		FONT_SIZE.put('Z', 46.529);
-		FONT_SIZE.put('-', 19.986);
-		FONT_SIZE.put('.', 11.454);
-		FONT_SIZE.put(' ', 15.483);
+		FONT_SIZE_TICKET = new HashMap<>();
+		FONT_SIZE_TICKET.put('A', 56.245);
+		FONT_SIZE_TICKET.put('B', 47.555);
+		FONT_SIZE_TICKET.put('C', 51.110);
+		FONT_SIZE_TICKET.put('D', 48.819);
+		FONT_SIZE_TICKET.put('E', 43.764);
+		FONT_SIZE_TICKET.put('F', 39.972);
+		FONT_SIZE_TICKET.put('G', 53.954);
+		FONT_SIZE_TICKET.put('H', 47.555);
+		FONT_SIZE_TICKET.put('I', 11.770);
+		FONT_SIZE_TICKET.put('J', 39.261);
+		FONT_SIZE_TICKET.put('K', 49.767);
+		FONT_SIZE_TICKET.put('L', 39.103);
+		FONT_SIZE_TICKET.put('M', 56.877);
+		FONT_SIZE_TICKET.put('N', 47.555);
+		FONT_SIZE_TICKET.put('O', 55.534);
+		FONT_SIZE_TICKET.put('P', 45.897);
+		FONT_SIZE_TICKET.put('Q', 55.534);
+		FONT_SIZE_TICKET.put('R', 49.451);
+		FONT_SIZE_TICKET.put('S', 46.687);
+		FONT_SIZE_TICKET.put('T', 46.687);
+		FONT_SIZE_TICKET.put('U', 47.634);
+		FONT_SIZE_TICKET.put('V', 53.006);
+		FONT_SIZE_TICKET.put('W', 74.730);
+		FONT_SIZE_TICKET.put('X', 54.349);
+		FONT_SIZE_TICKET.put('Y', 53.717);
+		FONT_SIZE_TICKET.put('Z', 46.529);
+		FONT_SIZE_TICKET.put('-', 19.986);
+		FONT_SIZE_TICKET.put('.', 11.454);
+		FONT_SIZE_TICKET.put(' ', 15.483);
+		MEALS = new HashMap<>();
+		MEALS.put("pizza-cheese", "01");
+		MEALS.put("pizza-chicken", "02");
+		MEALS.put("pizza-pepperoni", "03");
+		MEALS.put("hot-dog", "04");
+		MEALS.put("chicken-bake", "05");
+		MEALS.put("popeyes", "06");
+		MEALS.put("turkey-sub", "07");
+		MEALS.put("tuna-sub", "08");
+		MEALS.put("veggie-sub", "09");
+		MEALS.put("chicken-sandwich", "10");
+		MEALS.put("nigerian-chicken", "11");
+		MEALS.put("caribbean", "12");
+		MEALS.put("chinese-chow", "13");
+		MEALS.put("chinese-rice", "14");
+		MEALS.put("american-mac", "15");
+		MEALS.put("american-corn", "16");
+		MEALS.put("none", "--");
 		TICKET = new String[50];
 		Scanner ticketReader = new Scanner(new File("lightning_register_admin\\src\\main\\resources\\ticket-template.svg"));
 		int lineNumber = 0;
@@ -166,6 +193,14 @@ public class App extends Application {
 			lineNumber++;
 		}
 		ticketReader.close();
+		BADGE = new String[43];
+		Scanner badgeReader = new Scanner(new File("lightning_register_admin\\src\\main\\resources\\badge-template.svg"));
+		lineNumber = 0;
+		while (badgeReader.hasNext()) {
+			BADGE[lineNumber] = badgeReader.nextLine();
+			lineNumber++;
+		}
+		badgeReader.close();
 		CREDENTIAL = loadCredentials();
 
 		// Printer setup
@@ -259,7 +294,7 @@ public class App extends Application {
 
 		// Create the image part
 		MimeBodyPart imagePart = new MimeBodyPart();
-		imagePart.attachFile(new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png"));
+		imagePart.attachFile(new File(TEMP_DIR + "ticket-raster.png"));
 		imagePart.setContentID("<image1>");
 		imagePart.setDisposition(MimeBodyPart.INLINE);
 
@@ -286,6 +321,44 @@ public class App extends Application {
 		textPart.setContent("Hello,<br><br>We want to let you know that we've received your registration for " + ((String) user.get(COLUMN.get("firstName"))).trim() + " " + ((String) user.get(COLUMN.get("lastName"))).trim() + ".<br><br>However, because " + (gender ? "he" : "she") + " is younger than 7 years of age, " + (gender ? "he" : "she") + " will not be issued a participant ticket. Provisions will still be made for " + (gender ? "him" : "her") + " during the convention.<br><br>Thank you for your understanding. Please contact us at registration@mfmyouthministries.org or call 425-236-7364 if you have any questions.<br><br>God bless you.", "text/html");
 
 		// Combine parts into a multipart/related message
+		Multipart multipart = new MimeMultipart("related");
+		multipart.addBodyPart(textPart);
+
+		email.setContent(multipart);
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		email.writeTo(buffer);
+		return Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
+	}
+
+	public static String createMealEmail(List<Object> user, String id) throws MessagingException, IOException {
+		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
+		email.setFrom("mfmyouthministry@gmail.com");
+		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(((String) user.get(COLUMN.get("email"))).replaceAll(" ", "")));
+		email.setSubject("Your Access to Complimentary Meals - Dominion Dining Portal Now Open!");
+
+		// Create the email body
+		MimeBodyPart textPart = new MimeBodyPart();
+		textPart.setContent("<b>Hello " + ((String) user.get(COLUMN.get("firstName"))).trim() + ",</b><br>" + //
+				"We're excited to welcome you to the <b>Dominion Power - International Youth Convention 2025!</b><br>" + //
+				"As an eligible participant, you are entitled to complimentary lunch and dinner throughout the event (Thursday to Saturday). To help you choose your meals ahead of time, we've introduced the <b>Dominion Dining Portal</b> - a simple way to customize your dining experience.<br><br>" + //
+				"<b>Your Confirmation Code:<br>" + //
+				id + "</b><br>" + //
+				"You'll need this code to access the portal and make your meal selections.<br><br>" + //
+				"<b>What to Do Next:</b><br>" + //
+				"1. Visit the <b>Dominion Dining Portal</b>: dominion2025.github.io/food. If you're trying to view our website on your phone and it doesn't look quite right, no worries - it works best in desktop mode.<br>" + //
+				"For iPhone (Safari): Tap the 'AA' icon in the address bar, then select 'Request Desktop Website'.<br>" + //
+				"For Android (Chrome): Tap the three dots in the upper right corner, then check the box for 'Desktop Site'.<br>" + //
+				"2. Enter your confirmation code.<br>" + //
+				"3. Choose your lunch and dinner options for each day.<br>" + //
+				"4. Submit your selections by <b>Sunday, June 22, 2025.</b><br><br>" + //
+				"In addition to the complimentary meals, a <b>variety of meals and drinks</b> will be available on-site for purchase. So, whether you want a snack between sessions or an extra treat, you'll have plenty of options to choose from!<br>" + //
+				"If you need help at any stage, feel free to reach out to our support team at <b>coordinator@mfmyouthministries.org  (425-236-7364)</b><br>" + //
+				"We're looking forward to seeing you in Houston!<br>" + //
+				"God bless you,<br><br>" + //
+				"<b>Convention Planning Team</b><br>" + //
+				"MFM Youth Ministry (The Americas & Caribbean)<br>" + //
+				"mfmym.org", "text/html");
+
 		Multipart multipart = new MimeMultipart("related");
 		multipart.addBodyPart(textPart);
 
@@ -368,7 +441,7 @@ public class App extends Application {
 	 */
 	public static void generateTicket(List<Object> registration, String id) throws WriterException, IOException, NoSuchAlgorithmException {
 		String[] currentTicket = TICKET.clone();
-		File barcodeSave = new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png");
+		File barcodeSave = new File(TEMP_DIR + "barcode-temp.png");
 		MatrixToImageWriter.writeToPath(new PDF417Writer().encode(id, BarcodeFormat.PDF_417, 1000, 1000), "PNG", barcodeSave.toPath());
 		BufferedImage barcode = ImageIO.read(barcodeSave);
 		barcode = barcode.getSubimage(30, 30, barcode.getWidth() - 60, barcode.getHeight() - 60);
@@ -396,14 +469,14 @@ public class App extends Application {
 		for (String string : currentTicket) {
 			ticketBuilder.append(string + "\n");
 		}
-		PrintStream ps = new PrintStream("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+		PrintStream ps = new PrintStream(TEMP_DIR + "ticket-temp.svg");
 		ps.print(new String(ticketBuilder));
 		ps.close();
 
 		int firstNameLength = registration.get(COLUMN.get("firstName")).toString().length();
 		int lastNameLength = registration.get(COLUMN.get("lastName")).toString().length();
 		if (firstNameLength > 7 || lastNameLength > 7) {
-			File resave = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+			File resave = new File(TEMP_DIR + "ticket-temp.svg");
 			Scanner redoScn = new Scanner(resave);
 			String[] redo = new String[50];
 			for (int i = 0; redoScn.hasNext(); i++) {
@@ -414,7 +487,7 @@ public class App extends Application {
 			if (firstNameLength > 7) {
 				double length = 0;
 				for (char c : registration.get(COLUMN.get("firstName")).toString().toCharArray()) {
-					length += FONT_SIZE.get(Character.toUpperCase(c));
+					length += FONT_SIZE_TICKET.get(Character.toUpperCase(c));
 				}
 				length += 12.008 * ((double) (firstNameLength - 1));
 				double scalar = Math.min(550.0 / length, 1.0);
@@ -423,7 +496,7 @@ public class App extends Application {
 			if (lastNameLength > 7) {
 				double length = 0;
 				for (char c : registration.get(COLUMN.get("lastName")).toString().toCharArray()) {
-					length += FONT_SIZE.get(Character.toUpperCase(c));
+					length += FONT_SIZE_TICKET.get(Character.toUpperCase(c));
 				}
 				length += 12.008 * ((double) (lastNameLength - 1));
 				double scalar = Math.min(550.0 / length, 1.0);
@@ -434,10 +507,84 @@ public class App extends Application {
 			for (String string : redo) {
 				redoBuilder.append(string + "\n");
 			}
-			PrintStream redoPs = new PrintStream("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+			PrintStream redoPs = new PrintStream(TEMP_DIR + "ticket-temp.svg");
 			redoPs.print(new String(redoBuilder));
 			redoPs.close();
 		}
+	}
+
+	/**
+	 * Generates a badge image from the given registration information.
+	 *
+	 * @param registration the registration information
+	 * @throws WriterException          if there is an error writing the badge image
+	 * @throws IOException              if there is an error reading or writing to the file system
+	 * @throws NoSuchAlgorithmException if the SHA-256 algorithm is not available
+	 * @throws TranscoderException      if there is an error transcoding the image
+	 */
+	public static void generateBadge(List<Object> registration) throws WriterException, IOException, NoSuchAlgorithmException, TranscoderException {
+		String[] currentBadge = BADGE.clone();
+		File barcodeSave = new File(TEMP_DIR + "barcode-temp.png");
+		MatrixToImageWriter.writeToPath(new PDF417Writer().encode(registration.get(COLUMN.get("id")).toString(), BarcodeFormat.PDF_417, 1000, 1000), "PNG", barcodeSave.toPath());
+		BufferedImage barcode = ImageIO.read(barcodeSave);
+		barcode = barcode.getSubimage(30, 30, barcode.getWidth() - 60, barcode.getHeight() - 60);
+
+		ImageIO.write(barcode, "png", barcodeSave);
+		String base64Image = Base64.getEncoder().encodeToString(Files.readAllBytes(barcodeSave.toPath()));
+
+		currentBadge[5] = "<image width=\"1050\" height=\"244\" id=\"img2\" xlink:href=\"data:image/png;base64," + base64Image + "\"/>";
+		if (registration.get(COLUMN.get("age")).equals("7-11")) {
+			currentBadge[18] = ".s8 { fill: #bad9f7 }";
+		} else if (registration.get(COLUMN.get("age")).equals("12-18")) {
+			currentBadge[18] = ".s8 { fill: #fad1bb }";
+		} else if (registration.get(COLUMN.get("age")).equals("19-24")) {
+			currentBadge[18] = ".s8 { fill: #c6f2b6 }";
+		} else if (registration.get(COLUMN.get("age")).equals("25-34")) {
+			currentBadge[18] = ".s8 { fill: #faf2bb }";
+		} else if (registration.get(COLUMN.get("age")).equals("35-44")) {
+			currentBadge[18] = ".s8 { fill: #d1bbfa }";
+		} else if (registration.get(COLUMN.get("age")).equals("45-Above")) {
+			currentBadge[18] = ".s8 { fill: #fafafa }";
+		}
+		currentBadge[22] = "<text id=\"code-readout\" style=\"transform: matrix(1,0,0,1,160,1682)\"><tspan x=\"45\" y=\"100.7\" class=\"t1\">" + registration.get(COLUMN.get("id")).toString().toUpperCase() + "</tspan></text>";
+		if (registration.get(COLUMN.get("age")).equals("35-44") || registration.get(COLUMN.get("age")).equals("45-Above")) {
+			for (int i = 24; i < 33; i++) {
+				currentBadge[i] = "";
+			}
+		} else {
+			URL url = URI.create("https://food-e9814-default-rtdb.firebaseio.com/users.json").toURL();
+			try (InputStreamReader reader = new InputStreamReader(url.openStream())) {
+				Gson gson = new Gson();
+				Map<String, Object> data = gson.fromJson(reader, Map.class);
+				String[] foodOptions = new String[] { "--", "--", "--", "--", "--", "--" };
+				Object userData = data.get(registration.get(COLUMN.get("id")));
+				if (userData instanceof Map<?, ?>) {
+					Map<?, ?> userMap = (Map<?, ?>) userData;
+					foodOptions[0] = MEALS.getOrDefault(userMap.get("thursdayLunch"), "--");
+					foodOptions[1] = MEALS.getOrDefault(userMap.get("thursdayDinner"), "--");
+					foodOptions[2] = MEALS.getOrDefault(userMap.get("fridayLunch"), "--");
+					foodOptions[3] = MEALS.getOrDefault(userMap.get("fridayDinner"), "--");
+					foodOptions[4] = MEALS.getOrDefault(userMap.get("saturdayLunch"), "--");
+					foodOptions[5] = MEALS.getOrDefault(userMap.get("saturdayDinner"), "--");
+				}
+				currentBadge[25] = "<text id=\"food-s2\" style=\"transform: none\"><tspan x=\"0\" y=\"524.1\" class=\"t2\">" + foodOptions[5] + "</tspan></text>";
+				currentBadge[26] = "<text id=\"food-s1\" style=\"transform: matrix(1.39,0,0,1.39,101.823,1701.819)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[4] + "</tspan></text>";
+				currentBadge[27] = "<text id=\"food-f2\" style=\"transform: matrix(1.39,0,0,1.39,100.433,1615.642)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[3] + "</tspan></text>";
+				currentBadge[28] = "<text id=\"food-f1\" style=\"transform: matrix(1.39,0,0,1.39,100.433,1565.604)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[2] + "</tspan></text>";
+				currentBadge[29] = "<text id=\"food-t2\" style=\"transform: matrix(1.39,0,0,1.39,101.823,1479.428)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[1] + "</tspan></text>";
+				currentBadge[30] = "<text id=\"food-t1\" style=\"transform: matrix(1.39,0,0,1.39,101.823,1429.39)\"><tspan x=\"0\" y=\"24.1\" class=\"t2\">" + foodOptions[0] + "</tspan></text>";
+			}
+		}
+		currentBadge[36] = "<text id=\"first-name\" x=\"50%\" y=\"830\" text-anchor=\"middle\" dominant-baseline=\"middle\" style=\"transform: none;\"><tspan x=\"50%\" dy=\"0\" class=\"t7\">" + registration.get(COLUMN.get("firstName")) + "</tspan></text>";
+		currentBadge[37] = "<text id=\"first-name\" x=\"50%\" y=\"980\" text-anchor=\"middle\" dominant-baseline=\"middle\" style=\"transform: none;\"><tspan x=\"50%\" dy=\"0\" class=\"t7\">" + registration.get(COLUMN.get("lastName")) + "</tspan></text>";
+		StringBuilder badgeBuilder = new StringBuilder();
+		for (String string : currentBadge) {
+			badgeBuilder.append(string + "\n");
+		}
+		PrintStream ps = new PrintStream(TEMP_DIR + "badge-temp.svg");
+		ps.print(new String(badgeBuilder));
+		ps.close();
+		new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(TEMP_DIR + "badge-temp.svg")), new TranscoderOutput(new FileOutputStream(TEMP_DIR + "badge-raster.png")));
 	}
 
 	/**
@@ -486,10 +633,10 @@ public class App extends Application {
 				currentID = "TODDLER";
 				sendMessage(createToddlerEmail(current), CREDENTIAL);
 			} else {
-				File svgPath = new File("lightning_register_admin\\src\\main\\resources\\ticket-temp.svg");
+				File svgPath = new File(TEMP_DIR + "ticket-temp.svg");
 				currentID = generateID(current.get(COLUMN.get("firstName")).toString().trim() + current.get(COLUMN.get("lastName")).toString().trim() + current.get(COLUMN.get("email")).toString().trim() + current.get(COLUMN.get("phone")).toString().trim() + current.get(COLUMN.get("gender")).toString().trim() + current.get(COLUMN.get("age")).toString().trim());
 				generateTicket(current, currentID);
-				new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream("lightning_register_admin\\src\\main\\resources\\ticket-raster.png")));
+				new PNGTranscoder().transcode(new TranscoderInput(new FileInputStream(svgPath)), new TranscoderOutput(new FileOutputStream(TEMP_DIR + "ticket-raster.png")));
 				svgPath.delete();
 				review(current);
 				if (action.equals("reject")) {
@@ -500,12 +647,23 @@ public class App extends Application {
 					continue;
 				}
 				sendMessage(createTicketEmail(current, currentID), CREDENTIAL);
+				if (!current.get(COLUMN.get("age")).equals("35-44") && !current.get(COLUMN.get("age")).equals("45-Above")) {
+					// Otherwise, send meal email
+					try {
+						String email = createMealEmail(current, currentID);
+						System.out.println("Sending meal email to: " + current.get(COLUMN.get("email")));
+						sendMessage(email, CREDENTIAL);
+						Thread.sleep(5000); // Sleep to avoid rate limiting
+					} catch (Exception e) {
+						System.out.println("Failed to send meal email to: " + current.get(COLUMN.get("email")));
+					}
+				}
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), newID, CREDENTIAL);
 			action = "";
-			new File("lightning_register_admin\\src\\main\\resources\\ticket-raster.png").delete();
-			new File("lightning_register_admin\\src\\main\\resources\\barcode-temp.png").delete();
+			new File(TEMP_DIR + "ticket-raster.png").delete();
+			new File(TEMP_DIR + "barcode-temp.png").delete();
 		}
 	}
 
