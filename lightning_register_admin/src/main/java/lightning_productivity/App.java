@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -212,6 +213,27 @@ public class App extends Application {
 		}
 		System.out.println(PRINTER == null ? "Printer not found. Badge printing will be unavailable." : "Printer found. Badge printing will be available.");
 		loadSheetData();
+		/* Scanner foodScn = new Scanner(new File("D:\\King\\Downloads\\food.csv"));
+		Scanner notFoodScn = new Scanner(new File("D:\\King\\Downloads\\foodnot.csv"));
+		HashSet<String> notFoodies = new HashSet<>();
+		List<String> errors = new ArrayList<>();
+		while (notFoodScn.hasNext()) {
+			notFoodies.add(notFoodScn.nextLine().split(",")[0]);
+		}
+		while (foodScn.hasNext()) {
+			List<Object> lineList = Arrays.asList((Object[]) foodScn.nextLine().split(","));
+			if (!(lineList.get(9).equals("3-6") || lineList.get(9).equals("35-44") || lineList.get(9).equals("45-Above")) && !notFoodies.contains(lineList.get(1))) {
+				try {
+				sendMessage(createMealEmail(lineList, (String) lineList.get(1)), CREDENTIAL);
+				Thread.sleep(5000);
+				} catch (Exception e) {
+					errors.add((String) lineList.get(1));
+				}
+			}
+		}
+		for (String s : errors) {
+			System.out.println(s);
+		} */
 
 		launch();
 	}
@@ -334,11 +356,12 @@ public class App extends Application {
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(((String) user.get(COLUMN.get("email"))).replaceAll(" ", "")));
-		email.setSubject("Your Access to Complimentary Meals - Dominion Dining Portal Now Open!");
+		email.setSubject("Your Access to Complimentary Meals - Time is Running Out!");
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("<b>Hello " + ((String) user.get(COLUMN.get("firstName"))).trim() + ",</b><br>" + //
+		textPart.setContent("We still haven't heard from you yet. Please submit your choices by <b>Sunday, June 22, 2025</b> to secure your meals for the convention.<br>" +
+				"<b>Hello " + ((String) user.get(COLUMN.get("firstName"))).trim() + ",</b><br>" + //
 				"We're excited to welcome you to the <b>Dominion Power - International Youth Convention 2025!</b><br>" + //
 				"As an eligible participant, you are entitled to complimentary lunch and dinner throughout the event (Thursday to Saturday). To help you choose your meals ahead of time, we've introduced the <b>Dominion Dining Portal</b> - a simple way to customize your dining experience.<br><br>" + //
 				"<b>Your Confirmation Code:<br>" + //
@@ -790,11 +813,12 @@ public class App extends Application {
 		String[] regionIndex = { "REGION_1", "REGION_2", "REGION_3", "REGION_4", "REGION_CN", "REGION_CR" };
 		for (int i = 0; i < 6; i++) {
 			try {
-				List<List<Object>> registrationsTemp = readSheetData(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A1:J1000", CREDENTIAL);
+				List<List<Object>> registrationsTemp = readSheetData(SPREADHSEET_ID, SHEETS.get(regionIndex[i]) + "!A:J", CREDENTIAL);
 				for (int j = 1; j < registrationsTemp.size(); j++) {
 					if (registrationsTemp.get(j).get(COLUMN.get("id")).toString().isEmpty() || registrationsTemp.get(j).get(COLUMN.get("id")).toString().equals("TODDLER")) {
 						registrations.get(regionIndex[i]).put(registrationsTemp.get(j).get(COLUMN.get("date")).toString(), registrationsTemp.get(j));
 					} else {
+						registrationsTemp.get(j).set(0, j + 1);
 						registrations.get(regionIndex[i]).put(registrationsTemp.get(j).get(COLUMN.get("id")).toString(), registrationsTemp.get(j));
 					}
 				}

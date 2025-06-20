@@ -2,6 +2,7 @@ package lightning_productivity;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.batik.transcoder.TranscoderException;
 
@@ -28,32 +29,25 @@ public class RegistrationPage {
 	@FXML
 	private ImageView badge;
 	@FXML
-	private GridPane info;
-	@FXML
-	private Label firstName;
-	@FXML
-	private Label lastName;
-	@FXML
-	private Label phone;
-	@FXML
-	private Label email;
-	@FXML
-	private Label age;
-	@FXML
-	private Label region;
-	@FXML
 	private Label remarks;
 	@FXML
 	private Button accept;
 	@FXML
 	private Button reject;
 
-	public void initialize() {
+	private String currentRegion;
+	private int currentRow;
+
+	public void initialize() throws IOException {
+		App.loadSheetData();
 		search.setVisible(true);
 		labelTitle.setVisible(true);
-		info.setVisible(false);
 		badge.setVisible(false);
+		accept.setVisible(false);
+		reject.setVisible(false);
+		remarks.setVisible(false);
 		noRegistrationFound.setVisible(false);
+		id.setText("");
 
 		// Add listener to id TextField
 		if (id != null) {
@@ -75,26 +69,30 @@ public class RegistrationPage {
 		String[] regionIndex = { "REGION_1", "REGION_2", "REGION_3", "REGION_4", "REGION_CN", "REGION_CR" };
 		for (int i = 0; i < regionIndex.length; i++) {
 			if (App.registrations.get(regionIndex[i]).containsKey(code)) {
+				id.setText("");
+				currentRegion = App.SHEETS.get(regionIndex[i]);
+				currentRow = (Integer) App.registrations.get(regionIndex[i]).get(code).get(App.COLUMN.get("date"));
 				List<Object> registrationList = App.registrations.get(regionIndex[i]).get(code);
 				App.generateBadge(registrationList);
 				badge.setVisible(true);
-				info.setVisible(true);
-				search.setVisible(false);
-				labelTitle.setVisible(false);
+				accept.setVisible(true);
+				reject.setVisible(true);
 				noRegistrationFound.setVisible(false);
 				badge.setImage(new Image(new java.io.File(App.TEMP_DIR + "badge-raster.png").toURI().toString()));
-				firstName.setText((String) registrationList.get(App.COLUMN.get("firstName")));
-				lastName.setText((String) registrationList.get(App.COLUMN.get("lastName")));
-				phone.setText((String) registrationList.get(App.COLUMN.get("phone")));
-				email.setText((String) registrationList.get(App.COLUMN.get("email")));
-				age.setText(String.valueOf(registrationList.get(App.COLUMN.get("age"))));
-				region.setText(App.SHEETS.get(regionIndex[i]));
-				// remarks.setText(App.registrations.get(regionIndex[i]).get(code).get(App.COLUMN.get("remarks")).toString());
+				remarks.setText(App.registrations.get(regionIndex[i]).get(code).get(App.COLUMN.get("flag")).toString());
 				return;
-				// initialize();
 			}
 		}
 		// If no registration found, show the message
 		noRegistrationFound.setVisible(true);
+	}
+
+	@FXML
+	private void acceptRegistration() throws Exception {
+		List<List<Object>> value = List.of(List.of("Accepted at " + java.time.LocalDateTime.now()));
+		App.writeSheetData(App.SPREADHSEET_ID, currentRegion + "!C" + currentRow, value, App.CREDENTIAL);
+		System.out.println("Registration accepted for ID: " + id.getText());
+		// Reset the UI
+		initialize();
 	}
 }
