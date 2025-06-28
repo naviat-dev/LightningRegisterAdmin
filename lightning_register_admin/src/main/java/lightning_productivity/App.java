@@ -213,6 +213,7 @@ public class App extends Application {
 		}
 		System.out.println(PRINTER == null ? "Printer not found. Badge printing will be unavailable." : "Printer found. Badge printing will be available.");
 		loadSheetData();
+
 		/* Scanner foodScn = new Scanner(new File("D:\\King\\Downloads\\food.csv"));
 		Scanner notFoodScn = new Scanner(new File("D:\\King\\Downloads\\foodnot.csv"));
 		HashSet<String> notFoodies = new HashSet<>();
@@ -225,8 +226,9 @@ public class App extends Application {
 			if (!(lineList.get(9).equals("3-6") || lineList.get(9).equals("35-44") || lineList.get(9).equals("45-Above")) && !notFoodies.contains(lineList.get(1))) {
 				try {
 				sendMessage(createMealEmail(lineList, (String) lineList.get(1)), CREDENTIAL);
-				Thread.sleep(5000);
+				Thread.sleep(20000);
 				} catch (Exception e) {
+					e.printStackTrace();
 					errors.add((String) lineList.get(1));
 				}
 			}
@@ -305,6 +307,10 @@ public class App extends Application {
 	 * @throws IOException        If there is a problem reading the ticket image
 	 */
 	public static String createTicketEmail(List<Object> user, String id) throws MessagingException, IOException {
+		File tempDir = new File(TEMP_DIR);
+		if (!tempDir.exists()) {
+			tempDir.mkdirs();
+		}
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(user.get(COLUMN.get("email")).toString().replaceAll(" ", "")));
@@ -356,7 +362,7 @@ public class App extends Application {
 		MimeMessage email = new MimeMessage(Session.getDefaultInstance(new Properties(), null));
 		email.setFrom("mfmyouthministry@gmail.com");
 		email.addRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress(((String) user.get(COLUMN.get("email"))).replaceAll(" ", "")));
-		email.setSubject("Your Access to Complimentary Meals - Time is Running Out!");
+		email.setSubject("Your Access to Complimentary Meals - Portal Closes Today!");
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
@@ -463,6 +469,10 @@ public class App extends Application {
 	 * @throws NoSuchAlgorithmException if the SHA-256 algorithm is not available
 	 */
 	public static void generateTicket(List<Object> registration, String id) throws WriterException, IOException, NoSuchAlgorithmException {
+		File tempDir = new File(TEMP_DIR);
+		if (!tempDir.exists()) {
+			tempDir.mkdirs();
+		}
 		String[] currentTicket = TICKET.clone();
 		File barcodeSave = new File(TEMP_DIR + "barcode-temp.png");
 		MatrixToImageWriter.writeToPath(new PDF417Writer().encode(id, BarcodeFormat.PDF_417, 1000, 1000), "PNG", barcodeSave.toPath());
@@ -546,6 +556,10 @@ public class App extends Application {
 	 * @throws TranscoderException      if there is an error transcoding the image
 	 */
 	public static void generateBadge(List<Object> registration) throws WriterException, IOException, NoSuchAlgorithmException, TranscoderException {
+		File tempDir = new File(TEMP_DIR);
+		if (!tempDir.exists()) {
+			tempDir.mkdirs();
+		}
 		String[] currentBadge = BADGE.clone();
 		File barcodeSave = new File(TEMP_DIR + "barcode-temp.png");
 		MatrixToImageWriter.writeToPath(new PDF417Writer().encode(registration.get(COLUMN.get("id")).toString(), BarcodeFormat.PDF_417, 1000, 1000), "PNG", barcodeSave.toPath());
@@ -670,7 +684,7 @@ public class App extends Application {
 					continue;
 				}
 				sendMessage(createTicketEmail(current, currentID), CREDENTIAL);
-				if (!current.get(COLUMN.get("age")).equals("35-44") && !current.get(COLUMN.get("age")).equals("45-Above")) {
+				/* if (!current.get(COLUMN.get("age")).equals("35-44") && !current.get(COLUMN.get("age")).equals("45-Above")) {
 					// Otherwise, send meal email
 					try {
 						String email = createMealEmail(current, currentID);
@@ -680,7 +694,7 @@ public class App extends Application {
 					} catch (Exception e) {
 						System.out.println("Failed to send meal email to: " + current.get(COLUMN.get("email")));
 					}
-				}
+				} */
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), newID, CREDENTIAL);
