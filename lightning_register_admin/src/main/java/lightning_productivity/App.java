@@ -101,8 +101,6 @@ public class App extends Application {
 		registrationPage = new Scene(loadFXML("RegistrationPage"));
 		stage.setScene(landingPage);
 		stage.setTitle("LightningRegister Admin");
-		// stage.getIcons().add(new Image(getClass().getResource("lightning_register_admin/src/main/resources/img/logo.png").toURI().toString()));
-		// stage.setFullScreen(true);
 		stage.show();
 	}
 
