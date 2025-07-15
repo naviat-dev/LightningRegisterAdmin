@@ -180,40 +180,7 @@ public class MainPage implements Initializable {
 		unprocessedRegistrationsPane.textProperty().bind(unprocessedRegistrationsTitle);
 		process.textProperty().bind(processTitle);
 		unflag.textProperty().bind(unflagTitle);
-
-		processedRegistrationsTable.setRowFactory(table -> {
-			TableRow<SimpleStringProperty[]> row = new TableRow<>();
-			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && (!row.isEmpty())) {
-					SimpleStringProperty[] rowData = row.getItem();
-					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
-					// ((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
-				}
-			});
-			return row;
-		});
-		flaggedRegistrationsTable.setRowFactory(table -> {
-			TableRow<SimpleStringProperty[]> row = new TableRow<>();
-			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && (!row.isEmpty())) {
-					SimpleStringProperty[] rowData = row.getItem();
-					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
-					// ((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
-				}
-			});
-			return row;
-		});
-		unprocessedRegistrationsTable.setRowFactory(table -> {
-			TableRow<SimpleStringProperty[]> row = new TableRow<>();
-			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && (!row.isEmpty())) {
-					SimpleStringProperty[] rowData = row.getItem();
-					System.out.println("Double-clicked on row: " + rowData); // Call the scene-switching logic
-					// ((Stage) unprocessedRegistrationsTable.getScene().getWindow()).setScene(App.registrationPage);
-				}
-			});
-			return row;
-		});
+		
 		tabs.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
 			if (oldTab.getContent() instanceof Pane) {
 				Pane oldPane = (Pane) oldTab.getContent();

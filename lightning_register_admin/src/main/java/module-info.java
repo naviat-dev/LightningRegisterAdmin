@@ -34,6 +34,7 @@ module lightning_productivity {
 	requires com.google.auth;
 	requires com.google.api.client.json.gson;
     requires com.google.gson;
+    requires org.apache.pdfbox;
 
 	opens lightning_productivity to javafx.fxml;
 

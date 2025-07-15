@@ -1,8 +1,10 @@
 package lightning_productivity;
 
+import java.awt.Desktop;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.print.PrinterException;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -35,9 +36,9 @@ import javax.mail.Session;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
-
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -116,6 +117,7 @@ public class App extends Application {
 		if (!tempDir.exists()) {
 			tempDir.mkdirs();
 		}
+		System.out.println("Temporary directory: " + TEMP_DIR);
 		action = "";
 		COLUMN = new HashMap<>();
 		COLUMN.put("date", 0);
@@ -209,31 +211,7 @@ public class App extends Application {
 				break;
 			}
 		}
-		System.out.println(PRINTER == null ? "Printer not found. Badge printing will be unavailable." : "Printer found. Badge printing will be available.");
 		loadSheetData();
-
-		/* Scanner foodScn = new Scanner(new File("D:\\King\\Downloads\\food.csv"));
-		Scanner notFoodScn = new Scanner(new File("D:\\King\\Downloads\\foodnot.csv"));
-		HashSet<String> notFoodies = new HashSet<>();
-		List<String> errors = new ArrayList<>();
-		while (notFoodScn.hasNext()) {
-			notFoodies.add(notFoodScn.nextLine().split(",")[0]);
-		}
-		while (foodScn.hasNext()) {
-			List<Object> lineList = Arrays.asList((Object[]) foodScn.nextLine().split(","));
-			if (!(lineList.get(9).equals("3-6") || lineList.get(9).equals("35-44") || lineList.get(9).equals("45-Above")) && !notFoodies.contains(lineList.get(1))) {
-				try {
-				sendMessage(createMealEmail(lineList, (String) lineList.get(1)), CREDENTIAL);
-				Thread.sleep(20000);
-				} catch (Exception e) {
-					e.printStackTrace();
-					errors.add((String) lineList.get(1));
-				}
-			}
-		}
-		for (String s : errors) {
-			System.out.println(s);
-		} */
 
 		launch();
 	}
@@ -364,8 +342,7 @@ public class App extends Application {
 
 		// Create the email body
 		MimeBodyPart textPart = new MimeBodyPart();
-		textPart.setContent("We still haven't heard from you yet. Please submit your choices by <b>Sunday, June 22, 2025</b> to secure your meals for the convention.<br>" +
-				"<b>Hello " + ((String) user.get(COLUMN.get("firstName"))).trim() + ",</b><br>" + //
+		textPart.setContent("We still haven't heard from you yet. Please submit your choices to secure your meals for the convention.<br>" + "<b>Hello " + ((String) user.get(COLUMN.get("firstName"))).trim() + ",</b><br>" + //
 				"We're excited to welcome you to the <b>Dominion Power - International Youth Convention 2025!</b><br>" + //
 				"As an eligible participant, you are entitled to complimentary lunch and dinner throughout the event (Thursday to Saturday). To help you choose your meals ahead of time, we've introduced the <b>Dominion Dining Portal</b> - a simple way to customize your dining experience.<br><br>" + //
 				"<b>Your Confirmation Code:<br>" + //
@@ -377,7 +354,6 @@ public class App extends Application {
 				"For Android (Chrome): Tap the three dots in the upper right corner, then check the box for 'Desktop Site'.<br>" + //
 				"2. Enter your confirmation code.<br>" + //
 				"3. Choose your lunch and dinner options for each day.<br>" + //
-				"4. Submit your selections by <b>Sunday, June 22, 2025.</b><br><br>" + //
 				"In addition to the complimentary meals, a <b>variety of meals and drinks</b> will be available on-site for purchase. So, whether you want a snack between sessions or an extra treat, you'll have plenty of options to choose from!<br>" + //
 				"If you need help at any stage, feel free to reach out to our support team at <b>coordinator@mfmyouthministries.org  (425-236-7364)</b><br>" + //
 				"We're looking forward to seeing you in Houston!<br>" + //
@@ -420,9 +396,6 @@ public class App extends Application {
 
 		// Execute the request and parse the response
 		Map<String, Object> response = request.execute().parseAs(Map.class);
-
-		// Step 4: Print the response for debugging or confirmation
-		System.out.println("Email sent successfully: " + response);
 	}
 
 	/**
@@ -682,17 +655,15 @@ public class App extends Application {
 					continue;
 				}
 				sendMessage(createTicketEmail(current, currentID), CREDENTIAL);
-				/* if (!current.get(COLUMN.get("age")).equals("35-44") && !current.get(COLUMN.get("age")).equals("45-Above")) {
+				if (!current.get(COLUMN.get("age")).equals("35-44") && !current.get(COLUMN.get("age")).equals("45-Above")) {
 					// Otherwise, send meal email
 					try {
 						String email = createMealEmail(current, currentID);
-						System.out.println("Sending meal email to: " + current.get(COLUMN.get("email")));
 						sendMessage(email, CREDENTIAL);
 						Thread.sleep(5000); // Sleep to avoid rate limiting
 					} catch (Exception e) {
-						System.out.println("Failed to send meal email to: " + current.get(COLUMN.get("email")));
 					}
-				} */
+				}
 			}
 			List<List<Object>> newID = Arrays.asList(Arrays.asList(currentID));
 			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + registrationUpdates.get(i + 1), newID, CREDENTIAL);
@@ -783,6 +754,19 @@ public class App extends Application {
 			List<List<Object>> newFlag = Arrays.asList(Arrays.asList("Duplicate"));
 			writeSheetData(SPREADHSEET_ID, SHEETS.get(ACTIVE_REGION) + "!" + flagUpdates.get(i), newFlag, CREDENTIAL);
 		}
+	}
+
+	public static void printBadge() throws PrintException, IOException, PrinterException {
+		File badgePng = new File(TEMP_DIR + "badge-raster.png");
+		if (!badgePng.exists()) {
+			System.err.println("Badge image not found.");
+			return;
+		}
+
+		File badgePdf = new File(TEMP_DIR + "badge-pdf.pdf");
+		PngToPdfConverter.convertToPdf(badgePng, badgePdf);
+
+		Desktop.getDesktop().print(badgePdf);
 	}
 
 	/**

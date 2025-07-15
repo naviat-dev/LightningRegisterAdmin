@@ -69,15 +69,16 @@ public class RegistrationPage {
 			if (App.registrations.get(regionIndex[i]).containsKey(code)) {
 				id.setText("");
 				currentRegion = App.SHEETS.get(regionIndex[i]);
-				currentRow = (Integer) App.registrations.get(regionIndex[i]).get(code).get(App.COLUMN.get("date"));
 				List<Object> registrationList = App.registrations.get(regionIndex[i]).get(code);
+				currentRow = (Integer) registrationList.get(App.COLUMN.get("date"));
+				System.out.println(registrationList.toString());
 				App.generateBadge(registrationList);
 				badge.setVisible(true);
 				accept.setVisible(true);
 				reject.setVisible(true);
 				noRegistrationFound.setVisible(false);
+				remarks.setText(registrationList.get(App.COLUMN.get("flag")).toString());
 				badge.setImage(new Image(new java.io.File(App.TEMP_DIR + "badge-raster.png").toURI().toString()));
-				remarks.setText(App.registrations.get(regionIndex[i]).get(code).get(App.COLUMN.get("flag")).toString());
 				return;
 			}
 		}
@@ -89,7 +90,7 @@ public class RegistrationPage {
 	private void acceptRegistration() throws Exception {
 		List<List<Object>> value = List.of(List.of("Accepted at " + java.time.LocalDateTime.now()));
 		App.writeSheetData(App.SPREADHSEET_ID, currentRegion + "!C" + currentRow, value, App.CREDENTIAL);
-		System.out.println("Registration accepted for ID: " + id.getText());
+		App.printBadge();
 		// Reset the UI
 		initialize();
 	}
