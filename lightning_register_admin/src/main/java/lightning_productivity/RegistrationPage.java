@@ -77,6 +77,8 @@ public class RegistrationPage {
 				accept.setVisible(true);
 				reject.setVisible(true);
 				noRegistrationFound.setVisible(false);
+				remarks.setVisible(true);
+				remarks.setStyle("-fx-text-fill: red;");
 				remarks.setText(registrationList.get(App.COLUMN.get("flag")).toString());
 				badge.setImage(new Image(new java.io.File(App.TEMP_DIR + "badge-raster.png").toURI().toString()));
 				return;
